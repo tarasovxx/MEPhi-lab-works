@@ -9,7 +9,7 @@
 int main() {
     const char *msgs[] = {"0. Quit", "1. Add",
                           "2. Find", "3. Delete",
-                          "4. Show", "5. Reorganaze",
+                          "4. Show", "5. CheckRelease",
                           "6. Import from file"};
     const int cntMsgs = sizeof(msgs) / sizeof(msgs[0]);
 
@@ -19,19 +19,22 @@ int main() {
     D_Find(Table *), // поиск элемента
     D_Delete(Table *), // удаление элемента
     D_Show(Table *), //Вывод
-    D_Reorganization(Table *), // реорганизация таблицы (сборщик мусора)
+    D_CheckRelease(Table *), // реорганизация таблицы (сборщик мусора)
     D_Import(Table *);
 
 
     int (*fptr[])(Table *) = {NULL, D_Add, D_Find,
                                D_Delete, D_Show,
-                               D_Reorganization, D_Import};
+                              D_CheckRelease, D_Import};
     int m;
     printf("Enter the msize value --->");
     getInt(&m);
     table->msize = m;
 
     table->ks = (KeySpace *) calloc(table->msize, sizeof(KeySpace));
+    for (int i = 0; i < table->msize; ++i) {
+        table->ks[i].data = calloc(1, sizeof(Item));
+    }
     int rc;
     while (rc = dialog(msgs, cntMsgs)) {
         if (!fptr[rc](table)) {

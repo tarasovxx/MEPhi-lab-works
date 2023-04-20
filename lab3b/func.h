@@ -9,7 +9,9 @@ typedef struct KeySpace {
     int busy;
     unsigned int key;
     unsigned int par;
-    Item *data;
+    //Item *data;
+    int offset; // Смещение в файле
+    int len; //длина информации
 } KeySpace;
 
 

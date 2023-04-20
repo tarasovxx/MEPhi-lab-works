@@ -9,13 +9,8 @@
 
 #ifdef queue_list
 
-Queue *queue_new(int capacity) {
+Queue *queue_new(const int c) {
     Queue *q = (Queue *) calloc(1, sizeof(Queue));
-    q->head = calloc(1, sizeof(List));
-    //q->head->data = calloc(1, sizeof(Item));
-    q->tail = calloc(1, sizeof(List));
-    //q->tail = q->head;
-    q->capacity = capacity;
     return q;
 }
 
@@ -61,21 +56,37 @@ int queue_push(Queue *queue, Item *t) {
 
     return 0;
 }
+//
+//int queue_pop(Queue *queue, Item *info) {
+//    if (queue->head == NULL)
+//        return 1;
+//
+//    info = queue->head->data;
+//
+//    List *head = queue->head;
+//    queue->head = head->next;
+//    free(head);
+//
+//    if (queue->head == NULL)
+//        queue->tail = NULL;
+//
+//    return 0;
+//}
 
-int queue_pop(Queue *queue) { //, char *output
-    if (!queue->head) {
-        return 1;
-    }
-    //*output = queue->head->data;
-    if (queue->head == queue->tail) {
-        queue->tail = NULL;
-    }
-    List *head = queue->head;
-    queue->head = head->next;
-    queue->n--;
-    free(head);
-    return 0;
-}
+ int queue_pop(Queue *queue, Item *info) { //, char *output
+     if (!queue->head) {
+         return 1;
+     }
+     info = queue->head->data;
+     if (queue->head == queue->tail) {
+         queue->tail = NULL;
+     }
+     List *head = queue->head;
+     queue->head = head->next;
+     queue->n--;
+     free(head);
+     return 0;
+ }
 
 void queue_print(const Queue *queue) {
     List *ptr = queue->head; //if (queue->mas[i + 1].ta > m) break;
@@ -84,7 +95,7 @@ void queue_print(const Queue *queue) {
         printf("\n");
         return ;
     }
-    while (i < queue->n) {
+    while (ptr && i < queue->n) {
         printf("%c\t", ptr->data->id);
         ptr = ptr->next;
         ++i;
@@ -94,9 +105,15 @@ void queue_print(const Queue *queue) {
 
 int queue_front(Queue *q, Item **new1) {
     if (q->n == 0) return 1;
-    *new1 = q->head->data;
+    if (q->head && q->head->data) *new1 = q->head->data;
     return 0;
 }
+
+int queue_empty(Queue *q) {
+    if (q->n == 0) return 1;
+    return 0;
+}
+
 
 
 

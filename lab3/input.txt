@@ -1,5 +1,5 @@
-6
-1 28 0 Artyom
-1 12 28 Tarasov
-1 15 0 sdfdsfsdg
-1 787 0 dkfjgndkjfsngjdf
+5 4
+1;28;0;Artyom
+1;12;28;Tarasov
+1;15;0;sdfdsfsdg
+1;787;0;dkfjgndkjgfgdsg

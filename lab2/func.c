@@ -13,60 +13,120 @@
 #include "func.h"
 
 
+#define DELIM " "
+#define INF 100000
+
 ////Здесь находятся общие функции
-void reading (Item *tmp, int racks, Queue *mas, int len, int capacity) {
+
+//int perepoln(Item *tmp, int racks, Queue *mas, int len, int capacity)
+
+void reading (Item *tmp, int racks, Queue *mas, int len, const int capacity) {
     for (int i = 0; i < racks; ++i) {
         mas[i] = *queue_new(capacity);
+        //mas[i].capacity = capacity;
+        //mas[i].mas = (Item *) malloc(capacity * sizeof(Item));
     }
-//    for (int j = 0; j < len; ++j) {
-//        queue_push(&mas[j % racks], &tmp[j]);
-//    }
-    //Item *new = malloc(sizeof(Item));
     Item *new = malloc(sizeof(Item));
     Item *new1 = malloc(sizeof(Item));
-    int i = 0;
+    int i = 0, flag = 0, moment = 0, mintl = 1000, met = 0, ind = 0, d = 0;
     int *tl = (int *) calloc(racks, sizeof(int));
-    while (i < len) {
-        Item *t = &tmp[i]; //Имеет тот же адрес
-        if (mas[i % racks].n <= mas[i % racks].capacity) queue_push(&mas[i % racks], t);
-        if (tl[i % racks] == 0) {
-            //Item *new = malloc(sizeof(Item));
-            queue_front(&mas[i % racks], &new);
-            tl[i % racks] = new->ta + new->ts;
-            //free(new);
-        }
-        if (i >= racks - 1) {
-            for (int j = 0; j < racks; ++j) {
-                if (tl[j] <= t->ta) {
-                    queue_pop(&mas[j]);
-                    //Item *new1 = malloc(sizeof(Item));
-                    int f = queue_front(&mas[j], &new1);
-                    if (f == 1) tl[j] = 0;
-                    else tl[j] += new1->ts;
-                    //free(new1);
+    do {
+        int moment = countMoment(mas, tmp, i, len, racks, &ind, &met, tl, mintl, capacity);
+        checker(mas, tl, new, i, racks, &mintl);
+        balance(mas, tl, new1, tmp, i, racks, &ind, &met, moment, &mintl, len);
+        print(mas, tmp, moment, racks, i);
+        ++i;
+        flag = 0;
+        d = checkEmpty(mas, racks);
+    } while (!d); //2 a/1/20 b/1/15 c/2/10 d/5/8 e/6/5 f/6/9
+    free(tl);
+    if (new) free(new);
+    if (new1) free(new1);
+    free(tmp);
+}
+
+int checkEmpty(Queue *mas, int racks) { //Выводит 1, если всё пустое, то что нам нужно
+	for (int i = 0; i < racks; ++i) {
+		if (!queue_empty(&mas[i])) return 0;
+	}
+	return 1;
+	
+}
+
+int print(Queue *mas, Item *tmp, int moment, int racks, int i) {
+    //if (tmp[i + 1].ta != moment) {
+    //int x = tmp[i].ts;
+    printf("Moment #%d\n", moment);
+    for (int j = 0; j < racks; ++j) {
+        printf("#%d \t", j + 1);
+        queue_print(&mas[j % racks]);
+    }
+    // }
+}
+
+int balance(Queue *mas, int *tl, Item *new1, Item *tmp, int i, int racks, int *ind, int *met, int moment, int *mintl, int len) {
+    if (i >= racks - 1) {
+        for (int j = 0; j < racks; ++j) {
+            if (tl[j] <= moment) { //t->ta
+                Item trr;
+                queue_pop(&mas[j], &trr);
+                //Item *new1 = malloc(sizeof(Item));
+                int f = queue_front(&mas[j], &new1);
+                if (f == 1) tl[j] = INF;
+                else tl[j] += new1->ts;
+                int as = 1000;
+                for (int m = 0; m < racks; ++m) {
+                    if (tl[m] < as) {
+                        as = tl[m];
+                    }
+                }
+                *mintl = as;
+                if (*met == 1) {
+                    queue_push(&mas[j], &tmp[*ind]);
+                    if (*ind < len - 1) (*ind)++;
+                    else *met = 0;
                 }
             }
         }
-        if ((i == len - 1 || i < len - 1) && tmp[i + 1].ta != t->ta) {
-            printf("Moment #%d\n", t->ta);
-            for (int j = 0; j < racks; ++j) {
-                printf("#%d \t", j + 1);
-                queue_print(&mas[j % racks]);
-            }
-        }
-        ++i;
-
     }
-    free(tl);
-    //if (new) free(new);
-    //if (new1) free(new1);
+}
 
+
+int countMoment(Queue *mas, Item* tmp, int i, int len, int racks, int *ind, int *met, int *tl, int mintl, int c) {
+    Item *t = &tmp[i];
+    int moment = 0;
+    if (i < len) {
+        //t = &tmp[i]; //Имеет тот же адрес
+        moment = t->ta;
+    }
+    if (i < len) {
+        if (mas[i % racks].n < c) queue_push(&mas[i % racks], t); //mas[i % racks].n <= mas[i % racks].capacity
+        else {
+            *met = 1;
+            *ind = i; //Запоминаем, что начиная с этого индекса эементы ждут освобождения очередей
+        }
+        if (tl[i % racks] == INF) tl[i % racks] = 0;
+    }
+    if (i >= len || *met == 1) {
+        moment = mintl;
+    }
+    return moment;
+}
+
+int checker(Queue *mas, int *tl, Item *new, int i, int racks, int *mintl) {
+    if (tl[i % racks] == 0) {
+        int j = queue_front(&mas[i % racks], &new);
+        if (j != 1) tl[i % racks] = new->ta + new->ts;
+        if (tl[i % racks] < *mintl) *mintl = tl[i % racks];
+    }
 }
 
 int cmp_moment(const Item *p1, const Item *p2) {
     return p1->ta - p2->ta;
+    // if (m >= 0) return 1;
+    // else if (m < 0) return -1;
+    // else return 0;
 }
-
 
 void input(char *s, Item **arr, int *len) {
     char *istr = strtok(s, DELIM);

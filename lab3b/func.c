@@ -62,10 +62,10 @@ char *getStr(const char *ms) {
                 printf("Memory error!\n");
                 return NULL;
             }
-            //for (int i = 0; i < chunk_len; ++i) {
-            //    res[str_len - chunk_len + i] = buf[i];
-            //}
-            memcpy(res, buf, chunk_len); // Копирование очередных chunk_len символов в res из buf (из временного в постоянный)
+            for (int i = 0; i < chunk_len; ++i) {
+                res[str_len - chunk_len + i] = buf[i];
+            }
+            //mcp(res, buf, chunk_len); // Копирование очередных chunk_len символов в res из buf (из временного в постоянный)
             len = str_len;
         }
         else {

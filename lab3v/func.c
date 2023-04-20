@@ -1,4 +1,4 @@
-#include <stdio.h>
+    #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -20,9 +20,6 @@ int dialog(const char *msgs[], int n) {
     } while(rc < 0 || rc >= n);
     return rc;
 }
-
-
-
 
 int getInt(int *n) {
     while(1) {
@@ -62,10 +59,10 @@ char *getStr(const char *ms) {
                 printf("Memory error!\n");
                 return NULL;
             }
-            //for (int i = 0; i < chunk_len; ++i) {
-            //    res[str_len - chunk_len + i] = buf[i];
-            //}
-            memcpy(res, buf, chunk_len); // Копирование очередных chunk_len символов в res из buf (из временного в постоянный)
+            for (int i = 0; i < chunk_len; ++i) {
+                res[str_len - chunk_len + i] = buf[i];
+            }
+            //mcp(res, buf, chunk_len); // Копирование очередных chunk_len символов в res из buf (из временного в постоянный)
             len = str_len;
         }
         else {
@@ -82,7 +79,7 @@ char *getStr(const char *ms) {
 }
 
 char *getFileStr(FILE *in) {
-    char buf[80] = {}; //Временная строка
+    char buf[80] = {0}; //Временная строка
     char *res = NULL; //Итоговая строка
     int len = 0, status = 0;
     do {
@@ -117,3 +114,4 @@ char *getFileStr(FILE *in) {
     }
     return res;
 }
+

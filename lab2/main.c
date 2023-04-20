@@ -30,7 +30,7 @@ int main() {
     char *s = readline(PROMPT);
     Item *tempArr = NULL;
     input(s, &tempArr, &len);
-    Queue *mas = (Queue *) calloc(racks, sizeof(Queue)); //очереди к каждой стойке
+    Queue *mas = (Queue *) calloc(racks, sizeof(Queue)); //очереди к каждой стойке  
     reading(tempArr, racks, mas, len, CAPACITY);
     queue_deleteFull(mas, racks);
     free(s);

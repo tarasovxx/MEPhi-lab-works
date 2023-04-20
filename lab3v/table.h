@@ -18,19 +18,15 @@ int D_Delete(Table *); // удаление элемента
 
 int D_Show(Table *); //Вывод
 
-int D_Reorganization(Table *);
+int D_CheckRelease(Table *);
 
 int D_Import(Table *);
 
-int insert(Table *, int , int , char* );
+int insert(Table *, char* , int);
 
-int findKey(Table *, int );
+int findKey(Table *, const char *);
 
-int findParent(Table *, int );
-
-int delete(Table *, int , int );
-
-int delete2(Table *, int , int );
+int delete(Table *, const char * , int i);
 
 int reorganize(Table *);
 

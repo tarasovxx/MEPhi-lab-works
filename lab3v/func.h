@@ -2,13 +2,13 @@
 #define LAB3_FUNC_H
 
 typedef struct Item {
-    char *info;
+    unsigned int x;
 }Item;
 
 typedef struct KeySpace {
     int busy;
-    unsigned int key;
-    unsigned int par;
+    char *key;
+    unsigned int release;
     Item *data;
 } KeySpace;
 
@@ -22,6 +22,7 @@ int dialog(const char *msgs[], int N);
 char *getFileStr(FILE *);
 
 int to_int(char *s);
+
 
 
 #endif //LAB3_FUNC_H
