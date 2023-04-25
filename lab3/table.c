@@ -75,6 +75,7 @@ int insert(Table *t, int k, int par, char* info) {
     t->ks[t->csize].key = k;
     t->ks[t->csize].par = par;
     t->ks[t->csize].data = calloc(1, sizeof(Item));
+    //t->ks[t->csize].data->info = calloc(40, sizeof(char));
     t->ks[t->csize].data->info = info;
     //t->ks[t->csize].data->key = k;
     //t->ks[t->csize].data->ind = t->csize;
@@ -126,7 +127,8 @@ int D_Show(Table *t) {
     puts("busy ||| key ||| parentKey |||   info");
     for (int i = 0; i < t->csize; ++i) {
         //if (t->ks[i].busy == 1)
-        printf("%d \t %d \t %d \t\t %s\n", t->ks[i].busy, t->ks[i].key, t->ks[i].par, t->ks[i].data->info);
+        //if (i == t->csize) puts("*****************************************************************************");
+        if (t->ks[i].data) printf("%d \t %d \t %d \t\t %s\n", t->ks[i].busy, t->ks[i].key, t->ks[i].par, t->ks[i].data->info);
     }
     return 1;
 }
@@ -295,11 +297,11 @@ int to_int(char *s) {
 
 int delTable(Table *t) {
     for (int i = 0; i < t->csize; ++i) { //Возможна утечка при реорганизации
-        //if (t->ks[i].data->info) {
-            free(t->ks[i].data->info);
-            free(t->ks[i].data);
-            //free(&t->ks[i]);
-        //}
+        if (t->ks[i].data) {
+        	free(t->ks[i].data->info);
+        	free(t->ks[i].data);
+        }
+        
     }
     //free(t->ks->data);
     free(t->ks);
@@ -310,8 +312,13 @@ int reorganize(Table *t) {
     int i = 0, j = 0, len = t->csize, ls = 0;
     while (i < len) {
         if (t->ks[i].busy == 1) {
+        	//if (i != j) { 
+        	//	free(t->ks[j].data->info);
+        		//free(t->ks[i].data);
+        	//}
+        	//free(&t->ks[j]);
             //t->ks[j] = t->ks[i];
-            free(t->ks[j].data->info);
+            //if (t->ks[i].data) free(t->ks[i].data->info);
             *t->ks[j].data->info = *t->ks[i].data->info;
             t->ks[j].busy = t->ks[i].busy;
             t->ks[j].key = t->ks[i].key;
@@ -332,7 +339,7 @@ int reorganize(Table *t) {
     for (int i = 0; i < ls; ++i) {
     	free(t->ks[t->csize - 1].data->info);
     	free(t->ks[t->csize - 1].data);
-    	t->csize--;
+ 		t->csize--;
     }
     return j; //<---это последний +1 элемент
 }
@@ -349,11 +356,16 @@ int delete(Table *t, int k, int i) {
 }
 
 int delete2(Table *t, int k, int i) {
-    t->ks[i].busy = 0;
-    int j = findParent(t, t->ks[i].key);
+	int j = i;
+	while (j != -1) {
+		t->ks[j].busy = 0;
+		j = findParent(t, t->ks[j].key);
+	}
+    //t->ks[i].busy = 0;
+    //int j = findParent(t, t->ks[i].key);
     //if (i == j) j = -1;
-    while (j != -1) {
-        delete(t, t->ks[j].key, j);
-        j = findParent(t, t->ks[j].key);
-    }
+    //while (j != -1) {
+        //delete(t, t->ks[j].key, j);
+        //j = findParent(t, t->ks[j].key);
+    //}
 }

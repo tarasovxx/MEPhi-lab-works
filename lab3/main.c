@@ -32,6 +32,10 @@ int main() {
     table->msize = m;
 
     table->ks = (KeySpace *) calloc(table->msize, sizeof(KeySpace));
+    //for (int i = 0; i < table->msize; ++i) {
+    	//table->ks[i].data = calloc(1, sizeof(Item));
+    	//table->ks[i].data->info = calloc(40, sizeof(char));
+    //}
     int rc;
     while (rc = dialog(msgs, cntMsgs)) {
         if (!fptr[rc](table)) {
