@@ -114,6 +114,10 @@ int queue_empty(Queue *q) {
     return 0;
 }
 
+void queue_auto(Queue *q, int capacity) {
+	return ;
+}
+
 
 
 

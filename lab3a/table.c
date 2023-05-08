@@ -24,7 +24,7 @@ int D_Add(Table *t) {
     char *info = getStr("Enter info: ");
     if(info == NULL) return 0;
     rc = insert(t, k, par, info);
-    //free(info);
+    free(info);
     printf(errMsgs[rc]);
     //if (rc == 0) {
     //    printf(errMsgs[OK]);
@@ -39,22 +39,20 @@ int D_Add(Table *t) {
     return 1;
 }
 
-int findKey(Table *t, int k) { //Можно сделать Search && find отдельными функциями
-    if (t->csize == 0) return -1;
-    if (t->csize < 0) return -1; //Не нашли
+int findKey(Table *t, int k) { //Можно сделать Search && find отдельными функциями    
+    if (t->csize < 1) return -1; //Не нашли
     for (int i = 0; i < t->csize; ++i) {
-        if (k == t->ks[i].key && t->ks[i].busy == 1) return i;
+        if (t->ks[i].busy == 1 && k == t->ks[i].key) return i;
     }
-    return -1; //-1 Не нашли
+    return KEY_NOT_FOUND; //-1 Не нашли
 }
 
 int findParent(Table *t, int k) {
-    if (t->csize == 0) return -1;
-    if (t->csize < 0) return -1; //Не нашли
+    if (t->csize < 1) return -1; //Не нашли
     for (int i = 0; i < t->csize; ++i) {
         if (k == t->ks[i].par && t->ks[i].busy == 1) return i;
     }
-    return -1; //-1 Не нашли
+    return KEY_NOT_FOUND; //-1 Не нашли
 }
 
 
@@ -62,13 +60,13 @@ int insert(Table *t, int k, int par, char* info) {
     int i = findKey(t, k);
     if (i >= 0) {
         //puts("Duplicate keys\n");
-        return 1; //Отказ дублирование ключей
+        return DUPLICATE_KEY; //Отказ дублирование ключей
     }
-    if (t->csize >= t->msize) {
+    if (t->csize == t->msize) {
         int f = D_Reorganization(t);
-        if (t->msize <= f) {
+        if (f == TABLE_OVERFLOW) {
             //puts("Overflow\n");
-            return 2; //Отказ переполнение
+            return TABLE_OVERFLOW; //Отказ переполнение
         }
     }
     //t->ks[t->csize].data->ind = 0;
@@ -76,12 +74,13 @@ int insert(Table *t, int k, int par, char* info) {
     t->ks[t->csize].par = par;
     t->ks[t->csize].data = calloc(1, sizeof(Item));
     //t->ks[t->csize].data->info = calloc(40, sizeof(char));
-    t->ks[t->csize].data->info = info;
+    //t->ks[t->csize].data->info = info;
+    t->ks[t->csize].data->info = strdup(info);
     //t->ks[t->csize].data->key = k;
     //t->ks[t->csize].data->ind = t->csize;
     t->ks[t->csize].busy = 1;
     t->csize++;
-    return 0; //Good
+    return OK; //Good
 }
 
 int D_Delete(Table *t) {
@@ -92,12 +91,12 @@ int D_Delete(Table *t) {
         puts("You have entered an invalid value\n");
         return 0;
     }
-    int i = findKey(t, k);
+    int i = findKey(t, k); //Убрать в delete 
     if (i >= 0)
         delete2(t, k, i);
     if (i < 0) {
         puts("This key was not found\n");
-        return -1; //Такого ключа нет
+        return KEY_NOT_FOUND; //Такого ключа нет
     }
 //    int i = find(t, k);
 //    if (i < 0) return -1; //Такого ключа нет
@@ -118,7 +117,7 @@ int D_Find(Table *t) {
     int i = findKey(t, k);
     if (i < 0 || t->ks[i].busy == 0){
         printf("Element not found\n");
-        return -1; //Не найден
+        return KEY_NOT_FOUND; //Не найден
     }
     printf("Good! Element found! table[%d] = %s \n", k, t->ks[i].data->info); //Всё гуд, найден
 }
@@ -134,10 +133,10 @@ int D_Show(Table *t) {
 }
 
 int D_Reorganization(Table *t) {
-    int j = reorganize(t);
-    if (j >= t->msize) {
+    reorganize(t);
+    if (t->csize >= t->msize) {
         puts("The table was reorganized successfully, but the table is still full\n");
-        return -1;
+        return TABLE_OVERFLOW;
     }
     puts("Table reorganization is successful\n");
     return 1;
@@ -186,106 +185,6 @@ int D_Import(Table *t) {
     return 1;
 }
 
-/*int D_Import(Table *t) {
-    FILE *in;
-    int n, c, i = 0, flag = 0;
-    scanf("%*c");
-    char *path = getStr("Enter the file name: ");
-    //scanf("%s", path);
-    in = fopen(path, "r"); //C:\labs_in_c\2semestr\lab3\input.txt
-    if (in == NULL) {
-        puts("Error, this file not found\n");
-        return -3;
-    }
-    fscanf(in, "%d", &n);
-    fscanf(in, "%*c");
-    t->msize = n;
-    //t->csize = c;
-    t->ks = (KeySpace *) realloc(t->ks, (n + 1) * sizeof(KeySpace));
-    char *s;
-    int b, k, p;
-
-	while(fscanf(in, "%*[^,]%d%d%d%*c", &b, &k, &p, s)) {
-		t->ks[i].busy = b;
-		if (findKey(t, k) >= 0) {
-			flag = 1;
-			break;
-		}
-		t->ks[i].key = k;
-		t->ks[i].par = p;
-		t->ks[i].data = calloc(1, sizeof(Item));
-		t->ks[i].data->info = calloc(40, sizeof(char));
-		t->ks[i].data->info = s;
-	
-
-    
-    /*while (!feof(in)) {
-        int j = 0;
-        //fscanf(in, "%[^\n]", tmp);
-        char *tmp = getFileStr(in);
-        int sdf = strlen(tmp);
-        //printf("%d", sdf);
-        //tmp[sdf] = '\0';
-        //char *stmp = strdup(tmp);
-        char *istr = strtok(tmp, ",");
-        while (istr) {
-            if (j == 0) t->ks[i].busy = istr[0] - '0';
-            else if (j == 1) {
-                int q = to_int(istr);
-                if (findKey(t, q) >= 0) {
-                    flag = 1;
-                    break;
-                }
-                t->ks[i].key = q;
-            }
-            else if (j == 2) t->ks[i].par = to_int(istr);
-            else {
-            	t->ks[i].data = calloc(1, sizeof(Item));
-                t->ks[i].data->info = calloc(40, sizeof(char));
-            	//t->ks[i].data->info = istr;
-
-            	
-            	int sd = strlen(istr);
-                for (int l = 0; l < sd; ++l)
-                	t->ks[i].data->info[l] = istr[l];
-            }
-            j++;
-            istr = strtok(NULL, ",");
-        }
-        //free(tmp);
-
-//        fscanf(in, "%*c");
-//        fscanf(in, "%d%d%d", &t->ks[i].busy, &t->ks[i].key,
-//               &t->ks[i].par);
-//        fscanf(in, "%*c");
-//        fscanf(in, "%s\n", t->ks[i].data->info);
-        //t->csize++;
-        //int k = t->ks[i].key;
-//        int s = find(t, t->ks[i].key, 0);
-//        if (s >= 0) {
-//             continue;//Отказ дублирование ключей
-//        }
-        //if (t->csize >= t->msize) {
-        //    int f = D_Reorganization(t);
-        //    if (t->msize <= f) {
-        //        puts("Overflow\n");
-        //        return -1; //Отказ переполнение
-        //    }
-        //}
-        t->csize = i;
-        if (flag == 0) ++i;
-        flag = 0;
-        //t->ks[i].data = calloc(1, sizeof(Item));
-        //t->ks[i].data->info = calloc(40, sizeof(char));
-        //Item *ms = t->ks[1].data;
-        //int jfd = 0;
-        //free(tmp);
-    }
-    free(path);
-    fclose(in);
-    return 1;
-}*/
-
 int to_int(char *s) {
     int i = strlen(s), j = 0, ans = 0;
     while (j != i) {
@@ -308,41 +207,40 @@ int delTable(Table *t) {
     free(t);
 }
 
-int reorganize(Table *t) {
-    int i = 0, j = 0, len = t->csize, ls = 0;
-    while (i < len) {
-        if (t->ks[i].busy == 1) {
-        	//if (i != j) { 
-        	//	free(t->ks[j].data->info);
-        		//free(t->ks[i].data);
-        	//}
-        	//free(&t->ks[j]);
-            //t->ks[j] = t->ks[i];
-            //if (t->ks[i].data) free(t->ks[i].data->info);
-            *t->ks[j].data->info = *t->ks[i].data->info;
-            t->ks[j].busy = t->ks[i].busy;
-            t->ks[j].key = t->ks[i].key;
-            t->ks[j].par = t->ks[i].par;
-            j++;
-            //t->csize--;
+void reorganize(Table *table) {
+    int j = 0;
+    for (int i = 0; i < table->csize; ++i) {
+            if (table->ks[i].busy) {
+                if (j == i) {
+                    ++j;
+                    continue;
+                }
+                if (table->ks[j].data) {
+                	free(table->ks[j].data->info);
+                	free(table->ks[j].data);
+                }
+                table->ks[j] = table->ks[i];
+    
+                //table->ks[j].busy = 1;
+                //table->ks[j].key = table->ks[i].key;
+                //table->ks[j].par = table->ks[i].par;
+                ///table->ks[j].data = (Item *) malloc(sizeof(Item));
+                //table->ks[j].data->info = strdup(table->ks[i].data->info);
+                ++j;
+            }
+            else {    
+	            table->ks[i].busy = 0;
+	            free(table->ks[i].data->info);
+	            free(table->ks[i].data);
+	            table->ks[i].data = NULL;
+	        }
         }
-        else {
-        	//free(t->ks[t->csize - 1].data->info);
-        	//free(t->ks[t->csize - 1].data);
-        	//free(&t->ks[t->csize]);
-        	//t->csize--;
-        	ls++;
-        }
-        ++i;
-    }
-    //t->csize -= ls;
-    for (int i = 0; i < ls; ++i) {
-    	free(t->ks[t->csize - 1].data->info);
-    	free(t->ks[t->csize - 1].data);
- 		t->csize--;
-    }
-    return j; //<---это последний +1 элемент
+        //free(table->ks[j].data->info);
+        
+    
+        table->csize = j;
 }
+
 
 int delete(Table *t, int k, int i) {
     t->ks[i].busy = 0;
@@ -359,13 +257,11 @@ int delete2(Table *t, int k, int i) {
 	int j = i;
 	while (j != -1) {
 		t->ks[j].busy = 0;
-		j = findParent(t, t->ks[j].key);
+		int key = t->ks[j].key;
+		while (j != -1) {
+			t->ks[j].busy = 0;
+			j = findParent(t, key);
+		} 
+		if (j != -1) j = findParent(t, t->ks[j].key);
 	}
-    //t->ks[i].busy = 0;
-    //int j = findParent(t, t->ks[i].key);
-    //if (i == j) j = -1;
-    //while (j != -1) {
-        //delete(t, t->ks[j].key, j);
-        //j = findParent(t, t->ks[j].key);
-    //}
 }

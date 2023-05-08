@@ -33,6 +33,8 @@ int main() {
     Queue *mas = (Queue *) calloc(racks, sizeof(Queue)); //очереди к каждой стойке  
     reading(tempArr, racks, mas, len, CAPACITY);
     queue_deleteFull(mas, racks);
+    // for (int i = 0; i < racks; ++i) free(&mas[i]);
+    //free(mas);
     free(s);
     return 0;
 }

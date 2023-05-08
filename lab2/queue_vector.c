@@ -1,4 +1,4 @@
- #include <stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -53,10 +53,16 @@ void queue_print(const Queue *queue) {
 }
 
 void queue_deleteFull(Queue *q, int racks) {
+    // for (int i = 0; i < racks; ++i) {
+    	// free(q[i].mas);
+    	// //free(&q[i]);
+    // }
     for (int i = 0; i < racks; ++i) {
-        free(q[i].mas);
-    }
+            free(q[i].mas);
+        }
     free(q);
+    //free(q->mas);
+    //free(q);
 }
 
 int queue_front(Queue *q, Item **new) {
@@ -68,6 +74,13 @@ int queue_front(Queue *q, Item **new) {
 int queue_empty(Queue* q) {
     if (q->n == 0) return 1;
     return 0;
+}
+
+void queue_auto(Queue* queue, int capacity) {
+	queue->head = queue->tail = queue->n = 0;
+	queue->capacity = capacity;
+	
+	queue->mas = (Item *) calloc(capacity, sizeof(Item));
 }
 
 #endif

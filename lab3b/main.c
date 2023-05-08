@@ -9,8 +9,7 @@
 int main() {
     const char *msgs[] = {"0. Quit", "1. Add",
                           "2. Find", "3. Delete",
-                          "4. Show", "5. Reorganaze",
-                          "???6. Import from file"};
+                          "4. Show", "5. Reorganaze"};
 
     const int cntMsgs = sizeof(msgs) / sizeof(msgs[0]);
 

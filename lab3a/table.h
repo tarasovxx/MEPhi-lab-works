@@ -32,7 +32,7 @@ int delete(Table *, int , int );
 
 int delete2(Table *, int , int );
 
-int reorganize(Table *);
+void reorganize(Table *);
 
 int delTable(Table *);
 

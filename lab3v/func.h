@@ -7,9 +7,9 @@ typedef struct Item {
 
 typedef struct KeySpace {
     int busy;
-    char *key;
+    char * key;
     unsigned int release;
-    Item *data;
+    Item * data;
 } KeySpace;
 
 
@@ -22,6 +22,8 @@ int dialog(const char *msgs[], int N);
 char *getFileStr(FILE *);
 
 int to_int(char *s);
+
+int primeNumber(int n);
 
 
 

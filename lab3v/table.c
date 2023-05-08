@@ -6,7 +6,6 @@
 #include "func.h" //UNION
 #include "error.h"
 #include "hash.h"
-#include <readline/readline.h>
 
 int D_Add(Table *t) {
     int info, rc, n;
@@ -19,6 +18,7 @@ int D_Add(Table *t) {
     if(n == 0) return 0;
     rc = insert(t, key, info);
     printf(errMsgs[rc]);
+    free(key);
     return 1;
 }
 
@@ -26,14 +26,28 @@ int findKey(Table *t, const char *k) {
     if (t->csize < 1) return -1;
     int j = hash(k) % t->msize;
     int n = 0;
-    while (t->ks[j].busy != 0 && n < t->msize) {
-        if (t->ks[j].busy == 1 && hash(k)== hash(t->ks[j].key)) return j;
-        int p = t->msize % 2 == 0 ? 3 : 2;
-        j = (j + p) % t->msize;
+    while (t->ks[j].busy  && n < t->msize) {
+        if (hash(k)== hash(t->ks[j].key)) return j;
+        int step =  primeNumber(t->msize);  //По алгоритму Эратосфена находим ближайшее к msize простое число//t->msize % 2 == 0 ? 3 : 2;
+        j = (j + step) % t->msize;
         n++;
     }
     return -1; //-1 Не нашли
 }
+
+int findRelease(Table *t, const char *k, int rel) {
+    if (t->csize < 1) return -1;
+    int j = hash(k) % t->msize;
+    int n = 0;
+    while (t->ks[j].busy  && n < t->msize) {
+        if (hash(k) == hash(t->ks[j].key) && rel == t->ks[j].release) return j;
+        int step =  primeNumber(t->msize);  //По алгоритму Эратосфена находим ближайшее к msize простое число//t->msize % 2 == 0 ? 3 : 2;
+        j = (j + step) % t->msize;
+        n++;
+    }
+    return -1; //-1 Не нашли
+}
+
 
 int insert(Table *t, char* k, int info) {
     if (t->csize >= t->msize) return 2; //таблица заполнена
@@ -41,13 +55,13 @@ int insert(Table *t, char* k, int info) {
     int rel = 0;
     int n = 0; //Кол-во просмотренных элементов
     while (t->ks[j].busy == 1 && n < t->msize) {
-        int p = t->msize % 2 == 0 ? 3 : 2;
-        if (t->ks[j].busy == 1) rel++;
-        j = (j + p) % t->msize;
+        int step = primeNumber(t->msize);//t->msize % 2 == 0 ? 3 : 2;
+        if (t->ks[j].busy == 1 && strcmp(t->ks[j].key, k) == 0) rel++;
+        j = (j + step) % t->msize;
         n++;
     }
     if (n < t->msize) {
-       	t->ks[j].key = k;
+        t->ks[j].key = strdup(k);
         t->ks[j].busy = 1;
         t->ks[j].release = rel;
         t->ks[j].data->x = info;
@@ -57,7 +71,7 @@ int insert(Table *t, char* k, int info) {
 }
 
 int D_Delete(Table *t) {
-    int n;
+    int n, version;
     puts("Enter key, which you want to delete -->");
     scanf("%*c");
     char *k = getStr("");
@@ -65,9 +79,15 @@ int D_Delete(Table *t) {
         puts("You have entered an invalid value\n");
         return 0;
     }
-    int i = findKey(t, k);
-    if (i >= 0)
+    puts("Enter relese for this key, which you want to delete -->");
+    n = getInt(&version);
+    if (n == 0) return 0;
+    int i = findRelease(t, k, version);
+    if (i >= 0) {
+   		printf("The item table[%s] = %d was successfully deleted\n", k, t->ks[i].data->x);
+        printf("You have deleted %d version of the element\n", t->ks[i].release);
         delete(t, k, i);
+    }
     if (i < 0) {
         puts("This key was not found\n");
         return -1; //Такого ключа нет
@@ -75,8 +95,8 @@ int D_Delete(Table *t) {
 //    int i = find(t, k);
 //    if (i < 0) return -1; //Такого ключа нет
 //    t->ks[i].busy = 0;
-    printf("The item table[%s] = %d was successfully deleted\n", k, t->ks[i].data->x);
-    printf("You have deleted %d version of the element\n", t->ks[i].release);
+    //printf("The item table[%s] = %d was successfully deleted\n", k, t->ks[i].data->x);
+    //printf("You have deleted %d version of the element\n", t->ks[i].release);
     free(k);
     return 1; //Good
 }
@@ -101,46 +121,72 @@ int D_Find(Table *t) {
 int D_Show(Table *t) {
     puts("busy ||| key    |||  release ||| info");
     for (int i = 0; i < t->msize; ++i) {
-        if (t->ks[i].key)
+        if (t->ks[i].key && t->ks[i].busy)
             printf("%d \t %s \t\t %d \t %d\n", t->ks[i].busy, t->ks[i].key, t->ks[i].release, t->ks[i].data->x);
     }
     return 1;
 }
 
-//int D_Reorganization(Table *t) {
-//    int j = reorganize(t);
-//    if (j >= t->msize) {
-//        puts("The table was reorganized successfully, but the table is still full\n");
-//        return -1;
-//    }
-//    puts("Table reorganization is successful\n");
-//    return 1;
-//}
-
-
 int D_CheckRelease(Table *t) {
+    puts("Please select: \n1 - Find all versions of the item; \n2 - Find a single one;");
+    int checker,userSelect;
+    checker = getInt(&userSelect);
+    if (checker == 0) return 0;
     Table *newTable = (Table *) calloc(1, sizeof(Table));
-    newTable->ks = calloc(10, sizeof(KeySpace));
-
-    int i = 0;
+    int i = 0, sizeNewTable = 10;
+    newTable->ks = calloc(sizeNewTable, sizeof(KeySpace));
     puts("Enter key: -->");
     scanf("%*c");
     char *key = getStr("");
     if (key == NULL) return 0;
-    int j = hash(key) % t->msize;
-    int n = 0;
-    while (t->ks[j].busy == 1 && n < t->msize) {
-        int p = t->msize % 2 == 0 ? 3 : 2;
-        if (t->ks[j].busy == 1 && hash(key) == hash(t->ks[j].key)) {
-            newTable->ks[i++] = t->ks[j];
-            newTable->msize++;
-            newTable->csize++;
+    if (userSelect == 1) {
+        int j = hash(key) % t->msize;
+        int n = 0;
+        while (t->ks[j].busy == 1 && n < t->msize) {
+            int step = primeNumber(t->msize);//t->msize % 2 == 0 ? 3 : 2;
+            if (t->ks[j].busy == 1 && hash(key) == hash(t->ks[j].key)) {
+                //newTable->ks[i++] = t->ks[j];
+                newTable->ks[i].busy = t->ks[j].busy;
+                newTable->ks[i].key = strdup(t->ks[j].key);
+                newTable->ks[i].release = t->ks[j].release;
+                newTable->ks[i].data = malloc(sizeof(Item));
+                newTable->ks[i++].data->x = t->ks[j].data->x;
+                newTable->csize++;
+                newTable->msize++;
+                if (newTable->csize >= sizeNewTable) {
+                    sizeNewTable *= 2;
+                    newTable->ks = (KeySpace *) realloc(newTable->ks, sizeof(KeySpace) * sizeNewTable);
+                }
+            }
+            j = (j + step) % t->msize;
+            n++;
         }
-        j = (j + p) % t->msize;
-        n++;
+    }
+    else if (userSelect == 2) {
+        puts("Enter the version of the item you want to find --->");
+        int rel;
+        checker = getInt(&rel);
+        if (checker == 0) return 0;
+        int j = findRelease(t, key, rel);
+        if (j >= 0) {
+            newTable->ks[i].busy = t->ks[j].busy;
+            newTable->ks[i].key = strdup(t->ks[j].key);
+            newTable->ks[i].release = t->ks[j].release;
+            newTable->ks[i].data = malloc(sizeof(Item));
+        	newTable->ks[i++].data->x = t->ks[j].data->x;
+        	newTable->csize++;
+        	newTable->msize++;
+        }
+
+
     }
     puts("****************************************************");
     D_Show(newTable);
+    //free(newTable->ks);
+    //free(newTable);
+    delTable(newTable);
+    free(key);
+    return 1;
 
 }
 
@@ -196,11 +242,14 @@ int to_int(char *s) {
 }
 
 int delTable(Table *t) {
-    for (int i = 0; i < t->msize; ++i) { //Возможна утечка при реорганизации
+    for (int i = 0; i < t->msize; ++i) {
         //if (t->ks[i].data->info) {
+        if (t->ks[i].busy) {
+       		free(t->ks[i].key);
+       	}
         //free(t->ks[i].data->info);
-        free(t->ks[i].data);
-		if (t->ks[i].key) free(t->ks[i].key);
+       	free(t->ks[i].data);
+       	
         //free(&t->ks[i]);
         //}
     }
@@ -210,24 +259,9 @@ int delTable(Table *t) {
 }
 
 int delete(Table *t, const char *k, int i) {
-    //int i = findKey(t, k);
-    if (i  < t->msize && i > -1)
+    if (i < t->msize && i > -1)
         t->ks[i].busy = 0;
-    //int j = findParent(t, t->ks[i].key);
-    //if (j != -1) delete(t, t->ks[j].key, j);
-//    if (t->ks[i].par == 0) return 0;
-//    if (t->ks[i].par != 0) {
-//        int j = find(t, t->ks[i].par, 1);
-//        delete(t, t->ks[j].par, j);
-//    }
+        //free(t->ks[i].data);
+        free(t->ks[i].key);
+        t->csize--;
 }
-
-//int delete2(Table *t, int k, int i) {
-//    t->ks[i].busy = 0;
-//    int j = findParent(t, t->ks[i].key);
-//    //if (i == j) j = -1;
-//    while (j != -1) {
-//        delete(t, t->ks[j].key, j);
-//        j = findParent(t, t->ks[j].key);
-//    }
-//}

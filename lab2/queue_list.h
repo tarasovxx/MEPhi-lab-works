@@ -28,4 +28,6 @@ int queue_empty(Queue *q);
 
 void queue_deleteFull(Queue *, int );
 
+void queue_auto(Queue *, int);
+
 #endif

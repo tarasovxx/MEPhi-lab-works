@@ -1,42 +1,26 @@
-    #include <stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "func.h"
-#include "table.h"
+#include "checkFunc.h"
 
-int dialog(const char *msgs[], int n) {
-    char *errmsg = "";
-    int rc;
-    int i, n1;
-    do{
+// Функция ввода целого числа с проверкой правильности ввода.
+// Число должно размещаться на отдельной строке.
+// При вводе числа весь остаток строки удаляется из буфера ввода.
+// При обнаружении конца файла функция возвращает 0
+int getInt(int *pn) {
+    const char *errmsg = "";
+    int n;
+    do {
         puts(errmsg);
-        errmsg = "You are wrong. Repeate, please!";
-        for(i = 0; i < n; ++i)
-            puts(msgs[i]);
-        puts("Make your choice: --> ");
-        n1 = getInt(&rc);
-        if(n1 == 0) rc = 0;
-    } while(rc < 0 || rc >= n);
-    return rc;
-}
-
-int getInt(int *n) {
-    while(1) {
-        int m = scanf("%d", n);
-        if (m == -1) {
-            printf("\nExit!\n");
-            return -1;
-        }
-        if (m != 1) { // || (*n < 0);
-            printf("You are wrong, repeat, please!\n");
-            scanf("%*[^\n]");
-        }
-        else {
-            scanf("%*[^\n]");
-            return 1;
-        }
-    }
+        errmsg = "Illegal integer; enter once more";
+        n = scanf("%d", pn); //sizeof(int)
+        if (n < 0)	// обнаружен конец файла
+            return 0;
+        scanf("%*[^\n]"); // игнорирование всех символов до конца строки
+        scanf("%*c");	// игнорирование символа конца строки
+    } while (n == 0);
+    return 1;
 }
 
 
@@ -114,28 +98,3 @@ char *getFileStr(FILE *in) {
     }
     return res;
 }
-
-
-
-
-
-int primeNumber(int n) {
-    int *primes = (int *) calloc(n + 1, sizeof(int));
-    for (size_t k = 0; k < n; ++k) primes[k] = 1;
-    int i = 2, res = 0;
-    while (i <= n) {
-        //Если в текущей ячейке значение до этого не обнулилось, то в этой ячейке простое число
-        if (primes[i] != 0) {
-            res = i;
-            int j = i + i;
-            while (j <= n) {
-                primes[j] = 0;
-                j = j + 1;
-            }
-        }
-        ++i;
-    }
-    free(primes);
-    return res;
-}
-

@@ -29,4 +29,6 @@ void queue_deleteFull(Queue *, int );
 
 int queue_empty(Queue *);
 
+void queue_auto(Queue *, int);
+
 #endif //LAB2_QUEUE_VECTOR_H

@@ -7,6 +7,7 @@ typedef struct Table {
     struct KeySpace *ks;
     unsigned int msize;
     unsigned int csize;
+    // Засунуть массив с последний релизом
 } Table;
 
 
@@ -26,11 +27,12 @@ int insert(Table *, char* , int);
 
 int findKey(Table *, const char *);
 
-int delete(Table *, const char * , int i);
+int delete(Table *, const char * , int );
 
 int reorganize(Table *);
 
 int delTable(Table *);
 
+int findRelease(Table *, const char *, int);
 
 #endif //LAB3_TABLE_H

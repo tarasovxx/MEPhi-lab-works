@@ -22,13 +22,15 @@
 
 void reading (Item *tmp, int racks, Queue *mas, int len, const int capacity) {
     for (int i = 0; i < racks; ++i) {
-        mas[i] = *queue_new(capacity);
-        //mas[i].capacity = capacity;
+        //mas[i] = *queue_new(capacity);
+        //if (defined(queue_vector)) {
+        queue_auto(&mas[i], capacity);
+       	//mas[i].capacity = capacity;
         //mas[i].mas = (Item *) malloc(capacity * sizeof(Item));
     }
     Item *new = malloc(sizeof(Item));
     Item *new1 = malloc(sizeof(Item));
-    int i = 0, flag = 0, moment = 0, mintl = 1000, met = 0, ind = 0, d = 0;
+    int i = 0, flag = 0, moment = 0, mintl = 10000, met = 0, ind = 0, d = 0;
     int *tl = (int *) calloc(racks, sizeof(int));
     do {
         int moment = countMoment(mas, tmp, i, len, racks, &ind, &met, tl, mintl, capacity);
@@ -38,10 +40,12 @@ void reading (Item *tmp, int racks, Queue *mas, int len, const int capacity) {
         ++i;
         flag = 0;
         d = checkEmpty(mas, racks);
+        if (met == 1) d = 0;
     } while (!d); //2 a/1/20 b/1/15 c/2/10 d/5/8 e/6/5 f/6/9
     free(tl);
     if (new) free(new);
     if (new1) free(new1);
+    //for (int i = 0; i < len; ++i) free(&tmp[i]);
     free(tmp);
 }
 
@@ -74,14 +78,14 @@ int balance(Queue *mas, int *tl, Item *new1, Item *tmp, int i, int racks, int *i
                 int f = queue_front(&mas[j], &new1);
                 if (f == 1) tl[j] = INF;
                 else tl[j] += new1->ts;
-                int as = 1000;
+                int as = INF;
                 for (int m = 0; m < racks; ++m) {
-                    if (tl[m] < as) {
+                    if (tl[m] < as /*|| (*met == 1 && tmp[*ind].ta < as)*/) {
                         as = tl[m];
                     }
                 }
                 *mintl = as;
-                if (*met == 1) {
+                if (*met == 1 && moment >= tmp[*ind].ta) {
                     queue_push(&mas[j], &tmp[*ind]);
                     if (*ind < len - 1) (*ind)++;
                     else *met = 0;
