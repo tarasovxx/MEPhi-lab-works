@@ -5,12 +5,18 @@ typedef struct Item {
     unsigned int x;
 }Item;
 
+typedef struct Pair {
+    char *str;
+    unsigned int lastRelease;
+} Pair;
+
 typedef struct KeySpace {
     int busy;
     char * key;
     unsigned int release;
     Item * data;
 } KeySpace;
+
 
 
 int getInt(int *n);

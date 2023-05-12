@@ -3,8 +3,8 @@
 
 enum treeErrors {
     ERR = 0,
-    OK
-
+    OK,
+    ERR_FILE
 };
 
 #endif //LAB4A_ERROR_H

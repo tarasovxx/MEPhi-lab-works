@@ -1,13 +1,14 @@
 #ifndef LAB3_TABLE_H
 #define LAB3_TABLE_H
 
-//#include "func.h"
+#include "func.h"
 
 typedef struct Table {
     struct KeySpace *ks;
     unsigned int msize;
     unsigned int csize;
-    // Засунуть массив с последний релизом
+    int csizeRel;
+    Pair *rel; // Массив структур элементов, который хранит последнюю версию элемнета
 } Table;
 
 
@@ -34,5 +35,9 @@ int reorganize(Table *);
 int delTable(Table *);
 
 int findRelease(Table *, const char *, int);
+
+int binarySearch(const Table *, const char *);
+
+int insertLastRelease(Table *, char *);
 
 #endif //LAB3_TABLE_H

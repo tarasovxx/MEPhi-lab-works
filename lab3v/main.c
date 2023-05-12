@@ -32,6 +32,7 @@ int main() {
     table->msize = m;
 
     table->ks = (KeySpace *) calloc(table->msize, sizeof(KeySpace));
+    table->rel = (Pair *) calloc(table->msize, sizeof(Pair));
     for (int i = 0; i < table->msize; ++i) {
         table->ks[i].data = calloc(1, sizeof(Item));
     }

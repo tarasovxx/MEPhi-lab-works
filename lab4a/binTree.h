@@ -12,21 +12,28 @@ typedef struct Node{
 
 
 // функции для работы с деревом
-int insert(struct Node **, char *, int);	// вставка элемента
+int insert(Node **, char *, int);	// вставка элемента
 
-int delNode(struct Node **, char *);	// удаление элемента
+Node *deleteNode(Node *, char *);	// удаление элемента
 
-int findAll(struct Node **, struct Node *, char *);	// поиск элемента по ключу
+int findAll(Node **, Node *, char *);	// поиск элемента по ключу
 
-struct Node *findOne(struct Node *, char *);
+struct Node *findOne(Node *, char *);  // Поиск только одного элеимента (в случае дублирования самого старшего)
 
-struct Node *findMin(struct Node *);		// поиск минимального элемента
+struct Node *findMin(Node *);		// поиск минимального элемента
 
-void putTree(struct Node *, int);	// вывод дерева
+void putTree(Node *, int);	// вывод дерева
 
-void delTree(struct Node **);		// освобождение памяти
+void delTree(Node **);		// освобождение памяти
 
-void directTreeTraversal(Node * ); //Прямой обход дерева
+void directTreeTraversalInTheRange(Node *, char *, char *); //Прямой обход дерева в заданном диапазоне ключей
+
+//int lowerBound(Node **, Node * , char *); // Функция специального поиска
+
+int lowerBound(Node **masPtr, Node* root, char* key, int currDist, int dist, int* i);
+
+int countingСoincidences(char *str1, char *str2);
+
 
 
 #endif //LAB4A_BINTREE_H
