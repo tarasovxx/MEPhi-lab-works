@@ -100,7 +100,7 @@ void directTreeTraversalInTheRange(Node *root, char *a, char *b) {
     //puts("Please enter the specified range [a; b] |||| [P.S.: char *]");
     if (!root) return ;
     else {
-        if (strcmp(root->key, a) >= 0 && strcmp(root->key, b) <= 0) printf("%s ", root->key);
+	if (strcmp(root->key, a) >= 0 && strcmp(root->key, b) <= 0) printf("%s ", root->key);
         directTreeTraversalInTheRange(root->left, a, b);
         directTreeTraversalInTheRange(root->right, a, b);
     }

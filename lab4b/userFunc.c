@@ -47,8 +47,8 @@ int D_Add(Node **proot) {
     n = getInt(&information);
     if (n == 0)
         return 0; // обнаружен конец файла
-    rc = insert(proot, key, information);	// вставка элемента в таблицу
-    if (rc)
+    *proot = insert(*proot, key, information);	// вставка элемента в таблицу
+    if ((*proot)->key1)
         puts("Ok\n");
 //    else
 //        printf("Duplicate key: %d\n", k);
@@ -59,68 +59,56 @@ int D_Add(Node **proot) {
 
 // Диалоговая функция поиска элемента в таблице по ключу
 int D_Find(Node **proot) {
-    int k, n;
+    int k, n, ord;
 //    puts("Enter key: -->");
 //    n = getInt(&k);
     char *key = getStr("Enter key [P.S.: char *]: -->");
     if (!key)
         return 0;
-    Node **masPtr = (Node **) calloc(50, sizeof(Node *));
-    //masPtr = (Node **)calloc(i + 1, sizeof(Node *));
-    int len = findAll(masPtr, *proot, key);
-    masPtr = realloc(masPtr, len * sizeof(Node *));
-    if (len >= 1) {
-        for (size_t i = 0; i < len; ++i) {
-            printf("key = %s\ninformation = %d\nWas found\n", masPtr[i]->key, masPtr[i]->info);
-            puts("**************************");
-        }
+    puts("Enter release:");
+    n = getInt(&ord);
+    if (n == 0)
+        return 0;
+    Node *target = find(*proot, key, ord);
+    if (target) {
+        printf("key = %s\ninformation = %d\nWas found\n", target->key1->data, target->info);
     }
     else
-        printf("Node with key %s was not found\n", key);
+        if (*proot) printf("Node with key %s was not found\n", key);
     free(key);
-    free(masPtr);
     return OK;
 }
 
-// Диалоговая функция специального поиска элемента в таблице по ключу, значение которого наиболее близко к азаднному
+// Диалоговая функция специального поиска элемента в дереве (поиска элемента с наибольшим значением ключа)
 int D_FindSpecial(Node **proot) {
-    int k, n;
-//    puts("Enter key: -->");
-//    n = getInt(&k);
-    char *key = getStr("Enter key [P.S.: char *]: -->");
-    if (!key)
-        return 0;
-    Node **masPtr = (Node **) calloc(50, sizeof(Node *));
-    int i = 0;
-    int len = lowerBound(masPtr, *proot, key, 0, 0, &i);
-    masPtr = realloc(masPtr, len * sizeof(Node *));
-    puts("Keys whose value is closest to the specified one, but does not match it");
-    if (i >= 1) {
-        for (size_t j = 0; j < i; ++j) {
-            printf("key = %s; info = %d\n ", masPtr[j]->key, masPtr[j]->info);
-        }
+    Node *src = getMax(*proot);
+    char *conc = src->key1->data;
+    if (src->key2) conc = src->key2->data;
+    if (src) {
+        printf("The element with the highest key value: %s: %u", conc, src->info);
     }
-    else
-        printf("key = %s; info = %d\n ", (*proot)->key, (*proot)->info);
-    free(key);
-    free(masPtr);
     return OK;
 }
-
-
 
 // диалоговая функция удаления из дерева элемента, заданного ключом
 int D_Delete(Node **proot) {
-    int n, k;
-    int rc;
+    int n, k, ord;
     char *key = getStr("Enter key [P.S.: char *]: -->");
     if (!key)
+        return ERR;
+    puts("Enter release:");
+    n = getInt(&ord);
+    if (n == 0)
         return 0;
-    *proot = deleteNode(*proot, key);
-    if (*proot)
+    Node *elem = delete(*proot, key, ord);
+    if (elem) {
+    	*proot = elem; 
         printf("Ok\n");
-    else
-        if (*proot) printf("Node with key %d was not found\n", k);
+    }
+    else {
+		*proot = elem;
+		printf("Node with key %s was not found\n", key);
+	}
     free(key);
     return OK;
 }
@@ -128,20 +116,20 @@ int D_Delete(Node **proot) {
 // диалоговая функция вывода содержимого таблицы
 int D_Show(Node **proot) {
     printf("\n=== Your tree: ===\n\n");
-    //printTree(*proot);
-    //viewTree(*proot, 10);
-    putTree(*proot, 0);
+    print_tree(*proot, 0);
+    return OK;
+}
 
-    puts("\nDirect Tree Traversal In The Specifed Range");
+int D_Traversal(Node **proot) {
+    puts("Direct Tree Traversal In The Specifed Range");
     char *a = getStr("Please enter the specified range [a; b] |||| [P.S.: char *]\nEnter first key:");
-    //scanf("*c");
     char *b = getStr("Enter second key:");
     if (!a || !b) {
         puts("Error input, EOF inspected");
-        return 0;
+        return ERR;
     }
     puts("Key output:");
-    directTreeTraversalInTheRange(*proot, a, b);
+    treeTraversal(*proot, a, b);
     free(a);
     free(b);
     return OK;
@@ -163,9 +151,10 @@ int D_Import(Node **proot) {
         if (buffer[len - 1] == '\n') buffer[len - 1] = '\0';
         if (key == NULL) {
             key = strdup(buffer);
-        } else {
+        }
+        else {
             info = atoi(buffer);
-            insert(proot, key, info);
+            insert(*proot, key, info);
             key = NULL;
         }
     }
@@ -184,7 +173,9 @@ int D_Timing(Node **) {
     int n = 10, cnt = 1000000, i, m;
     char letters[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     char *key[10000];
+    char *k;
     clock_t first, last;
+    Node **masPtr = calloc(1000, sizeof(Node *));
     srand(time(NULL));
     while (n-- > 0){
         for (i = 0; i < 10000; ++i) {
@@ -201,20 +192,18 @@ int D_Timing(Node **) {
                 int rand_index = rand() % (sizeof(letters) - 1);
                 k[j] = letters[rand_index];
             }
-            if (insert(&root, k, rand()))
-            	++i;
+            if (insert(root, k, rand()))
+                ++i;
         }
         m = 0;
         first = clock();
-        for (i = 0; i < 10000; ++i) {
-            directTreeTraversalInTheRange(root, "a", "b");
-            ++m;
-        }
+        for (i = 0; i < 10000; ++i)
+            if (find(root, key[i], 0)) ++m;
         last = clock();
         printf("%d items was found\n", m);
         printf("test #%d, number of nodes = %d, time = %lf\n", 10 - n, (10 - n) * cnt, (double)(last - first) / CLOCKS_PER_SEC);
 
     }
     delTree(&root);
-    return 1;
+    return OK;
 }
