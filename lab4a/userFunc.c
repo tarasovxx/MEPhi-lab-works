@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
@@ -68,8 +69,9 @@ int D_Find(Node **proot) {
     Node **masPtr = (Node **) calloc(50, sizeof(Node *));
     //masPtr = (Node **)calloc(i + 1, sizeof(Node *));
     int len = findAll(masPtr, *proot, key);
-    masPtr = realloc(masPtr, len * sizeof(Node *));
+    //masPtr = realloc(masPtr, len * sizeof(Node *));
     if (len >= 1) {
+    	masPtr = realloc(masPtr, len * sizeof(Node *));
         for (size_t i = 0; i < len; ++i) {
             printf("key = %s\ninformation = %d\nWas found\n", masPtr[i]->key, masPtr[i]->info);
             puts("**************************");
@@ -91,21 +93,23 @@ int D_FindSpecial(Node **proot) {
     if (!key)
         return 0;
     Node **masPtr = (Node **) calloc(50, sizeof(Node *));
-    int i = 0;
-    int len = lowerBound(masPtr, *proot, key, 0, 0, &i);
+    int len = lowerBound(masPtr, *proot, key);
     masPtr = realloc(masPtr, len * sizeof(Node *));
     puts("Keys whose value is closest to the specified one, but does not match it");
-    if (i >= 1) {
-        for (size_t j = 0; j < i; ++j) {
+    if (len >= 1) {
+        for (size_t j = 0; j < len; ++j) {
             printf("key = %s; info = %d\n ", masPtr[j]->key, masPtr[j]->info);
         }
     }
     else
-        printf("key = %s; info = %d\n ", (*proot)->key, (*proot)->info);
+        printf("No closest keys were found\n");
+        //printf("key = %s; info = %d\n ", (*proot)->key, (*proot)->info);
+
     free(key);
     free(masPtr);
     return OK;
 }
+
 
 
 
@@ -131,10 +135,12 @@ int D_Show(Node **proot) {
     //printTree(*proot);
     //viewTree(*proot, 10);
     putTree(*proot, 0);
+    return OK;
+}
 
+int D_Traversal(Node **proot) {
     puts("\nDirect Tree Traversal In The Specifed Range");
     char *a = getStr("Please enter the specified range [a; b] |||| [P.S.: char *]\nEnter first key:");
-    //scanf("*c");
     char *b = getStr("Enter second key:");
     if (!a || !b) {
         puts("Error input, EOF inspected");
@@ -144,7 +150,6 @@ int D_Show(Node **proot) {
     directTreeTraversalInTheRange(*proot, a, b);
     free(a);
     free(b);
-    return OK;
 }
 
 
@@ -189,7 +194,8 @@ int D_Timing(Node **) {
     while (n-- > 0){
         for (i = 0; i < 10000; ++i) {
             char *k = calloc(5, sizeof(char));
-            for (int j = 0; j < 4; ++j) {
+            for (int j = 0; j < 4; ++j) {y
+            
                 int rand_index = rand() % (sizeof(letters) - 1);
                 k[j] = letters[rand_index];
             }

@@ -7,6 +7,7 @@ typedef struct Node{
     struct Node *left,			// left subtree
                 *right,		    // right subtree
                 *parent;		// parent node
+    struct Node *thread;        // thread node
     unsigned int info;
 } Node;
 
@@ -30,9 +31,13 @@ void directTreeTraversalInTheRange(Node *, char *, char *); //Прямой об�
 
 //int lowerBound(Node **, Node * , char *); // Функция специального поиска
 
-int lowerBound(Node **masPtr, Node* root, char* key, int currDist, int dist, int* i);
+int lowerBound(Node **, Node* , char * );
 
-int countingСoincidences(char *str1, char *str2);
+int countingСoincidences(char *, char *);
+
+void addThreadInOrder(Node * );
+
+void generateDotFile(Node *);
 
 
 

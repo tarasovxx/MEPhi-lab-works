@@ -96,16 +96,36 @@ Node* deleteNode(Node* root, char* key) {
 // Функция прямого обхода дерева
 // Вывод сожержимого дерева в прямом порядке следования ключей в заданном диапазоне
 void directTreeTraversalInTheRange(Node *root, char *a, char *b) {
-    // Задаём диапазон
-    //puts("Please enter the specified range [a; b] |||| [P.S.: char *]");
     if (!root) return ;
-    else {
-	if (strcmp(root->key, a) >= 0 && strcmp(root->key, b) <= 0) printf("%s ", root->key);
-        directTreeTraversalInTheRange(root->left, a, b);
-        directTreeTraversalInTheRange(root->right, a, b);
+    addThreadInOrder(root);
+    Node *ptr = root;
+    while (root) {
+        if (strcmp(root->key, a) >= 0 && strcmp(root->key, b) <= 0) {
+            printf("%s ", root->key);
+            printf(" -> ");
+        }
+        if (root->left) {
+            root = root->left;
+            continue;
+        }
+        else if (root->right) {
+            root = root->right;
+            continue;
+        }
+        if (root->thread) {
+            root = root->thread;
+            continue;
+        }
+        root = root->left;
     }
+//    else {
+//        if (strcmp(root->key, a) >= 0 && strcmp(root->key, b) <= 0) printf("%s ", root->key);
+//        directTreeTraversalInTheRange(root->left, a, b);
+//        directTreeTraversalInTheRange(root->right, a, b);
+//    }
 
 }
+
 
 // Функция поиска в таблице элемента, заданного ключом
 int findAll(Node **masPtr, Node *ptr, char *k) {
@@ -158,7 +178,7 @@ void putTree(Node *ptr, int level) {
         putTree(ptr->left, level + 1);
         while (i-- > 0)
             printf("  ");
-        if (ptr) printf("%s: %d\n", ptr->key, ptr->info);
+        if (ptr) printf("(%s;%d)\n", ptr->key, ptr->info);
         putTree(ptr->right, level + 1);
     }
 }
@@ -278,19 +298,66 @@ int countingСoincidences(char *str1, char *str2) {
 
 
 
-int lowerBound(Node **masPtr, Node* root, char* key, int currDist, int dist, int* i) {
+int lowerBound(Node **masPtr, Node* root, char* key) {
     if (root == NULL) {
         return 0;
     }
-    int flag = strcmp(root->key, key);
-    if (flag != 0) currDist = countingСoincidences(key, root->key);
-    if (currDist > dist && flag != 0) {
-        masPtr[(*i)++] =root;
-        dist = currDist;
+    addThreadInOrder(root);
+    int flag = 0, currDist = 0, dist = 0, len = 0;
+    while (root) {
+        flag = strcmp(root->key, key);
+        if (flag != 0) currDist = countingСoincidences(key, root->key);
+        if (currDist > dist && flag != 0) {
+            masPtr[len++] =root;
+            dist = currDist;
+        }
+        else if (currDist == dist && dist != 0 && flag != 0) masPtr[len++] = root;
+        if (root->left) {
+            root = root->left;
+            continue;
+        }
+        else if (root->right) {
+            root = root->right;
+            continue;
+        }
+        if (root->thread) {
+            root = root->thread;
+            continue;
+        }
+        root = root->left;
     }
-    else if (currDist == dist && dist != 0 && flag != 0) masPtr[(*i)++] = root;
-    lowerBound(masPtr, root->left, key, currDist, dist, i);
-    lowerBound(masPtr, root->right, key, currDist, dist, i);
-
-    return *i;
+    //lowerBound(masPtr, root->left, key, currDist, dist, i);
+    //lowerBound(masPtr, root->right, key, currDist, dist, i);
+    if (dist == 0) return 0;
+    return len;
 }
+
+void addThreadInOrder(Node* root) {
+    if (root == NULL)
+        return;
+    if (root->left && root->right && !root->left->left && !root->right->right) {
+        root->left->thread = root->right;
+    }
+    // Если есть левое поддерево, устанавливаем нить для самого правого узла в левом поддереве
+    if (root->left != NULL) {
+        Node* rightMost = root->left;
+        while (rightMost->right != NULL || rightMost->left != NULL)
+            if (rightMost->right) rightMost = rightMost->right;
+            else rightMost = rightMost->left;
+//        if (rightMost->right == NULL) {
+//        }
+        if (!rightMost->left && !rightMost->right && !rightMost->thread) rightMost->thread = root->right;
+    }
+//    if (root->right != NULL) {
+//        Node* leftRightMost = root;
+//        while (leftRightMost->left != NULL)
+//            leftRightMost = leftRightMost->left;
+//
+//        if (!leftRightMost->left && !leftRightMost->right) leftRightMost->thread = root->right;
+//    }
+    // Рекурсивно вызываем функцию для левого поддерева
+    addThreadInOrder(root->left);
+    // Рекурсивно вызываем функцию для правого поддерева
+    addThreadInOrder(root->right);
+}
+
