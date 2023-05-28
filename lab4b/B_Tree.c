@@ -12,13 +12,13 @@ int insert_to_node(Node *root, char *k, int value, int order) { // Вставк�
     if (root->key1 && root->key2) {
         return 1;
     }
-    if (!root->key1) {
+    if (root->key1 == NULL) {
         root->key1 = calloc(1, sizeof(Item));
         root->key1->data = strdup(k);
         root->key1->order = order;
         root->info = value;
     }
-    else if (!root->key2) {
+    else if (root->key2 == NULL) {
         root->key2 = calloc(1, sizeof(Item));
         root->key2->data = strdup(k);
         root->key2->order = order;
@@ -36,12 +36,11 @@ Node *insert(Node *root, char *key, int value) { // Всегда возвращ�
         newNode->info = value;
         return newNode;
     }
-    int checker = 0;
+    int checker = 0, order = 0;
     //Если root - это лист
     if (is_leaf(root)) {
-        int order = 0;
         Node *glav = root;
-        while (glav->parent) glav = root->parent;
+        while (glav->parent) glav = glav->parent;
         checkLastRelease(glav, key, &order);
         checker = insert_to_node(root, key, value, order);
     }
@@ -55,26 +54,28 @@ Node *insert(Node *root, char *key, int value) { // Всегда возвращ�
     else {
         insert(root->right, key, value);
     }
-    return checker == 1 ? split(root, key) : root;
+    return checker == 1 ? split(root, key, order, 0) : root;
 }
 
-Node *split(Node *root, char *k) {
+Node *split(Node *root, char *k, int ord, int flag) {
     //Создаём две ноды, которые имеют такого же родителя как и рахделяющийся элемент
     int ch = 0;
     Node *x = calloc(1, sizeof(Node));
     x->key1 = calloc(1, sizeof(Item));
     Node *y = calloc(1, sizeof(Node));
     y->key1 = calloc(1, sizeof(Item));
-    sort3(&root->key1->data, &root->key2->data, &k);
+    char *k_dup = strdup(k);
+    if (flag) free(k);
+    sort3(&root->key1->data, &root->key2->data, &k_dup);
     //if (strcmp(root->key1, k) > 0) swap(&root->key1, &k);
     x->key1->data = root->key1->data;
     x->key1->order = root->key1->order;
     x->info = root->info;
-    y->key1->data = strdup(k);
-    int ord = 0;
-    Node *glav = root;
-    while (glav->parent) glav = root->parent;
-    checkLastRelease(glav, k, &ord);
+    y->key1->data = k_dup;
+//    int ord = 0;
+//    Node *glav = root;
+//    while (glav->parent) glav = glav->parent;
+//    checkLastRelease(glav, k, &ord);
     y->key1->order = ord;
     y->info = root->info;
     x->parent = root->parent;
@@ -92,14 +93,21 @@ Node *split(Node *root, char *k) {
     if (y->middle) y->middle->parent = y;
     if (root->parent) {
         ch = insert_to_node(root->parent, root->key2->data, root->info, root->key2->order);
-        if (ch != 1) free(root->key2->data);
-        if (ch == 1) {
-	    //free(root->key2->data);
-            split(root->parent, root->key2->data);
+        if (ch != 1) {
             free(root->key2->data);
-            x->parent = root->parent;
-            y->parent = root->parent;
+            free(root->key2);
+            root->key2 = NULL;
         }
+//        if (ch == 1) {
+//            //free(root->key2->data);
+//            if (root->key2 && root->key2->data) {
+//                free(root->key2->data);
+//                free(root->key2);
+//                root->key2 = NULL;
+//            }
+//            x->parent = root->parent;
+//            y->parent = root->parent;
+//        }
         if (root->parent->left == root) root->parent->left = NULL;
         else if (root->parent->middle == root) root->parent->middle = NULL;
         else if (root->parent->right == root) root->parent->right = NULL;
@@ -119,11 +127,23 @@ Node *split(Node *root, char *k) {
             root->parent->right = x;
         }
         Node *tmp = root->parent;
-        //free(root->left);
-        //free(root);
-        psevdoDel(root);
+	char *newKey = NULL;
+        int targetInfo = 0;
+        if (ch == 1)  {
+            targetInfo = root->key2->order;
+            newKey = strdup(root->key2->data);
+            free(root->key2->data);
+            free(root->key2);
+            root->key2 = NULL;
+        }
+        free(root->key1);
+        free(root);
+        root = NULL;
+
+        //psevdoDel(root);
+        //root = tmp;
         //free(root->key1->data);
-        return tmp;
+        return ch != 1 ? tmp : split(tmp, newKey, targetInfo, 1);	//free(root);
     }
     else {
         x->parent = root;   // Так как в эту ветку попадает только корень,
@@ -132,13 +152,13 @@ Node *split(Node *root, char *k) {
         //free(root->key1->data);
         root->key1->data = root->key2->data;
         root->key1->order = root->key2->order;
-		free(root->key2);
+        free(root->key2);
         root->key2 = NULL;
-       
+
         root->left = x;
         root->middle = y;
         root->right = NULL;
-        return root;
+        return ch != 1 ? root : split(root->parent, root->key2->data, root->key2->order, 0);;
     }
 }
 
@@ -437,20 +457,20 @@ void print_tree(Node *root, int depth) {
     }
     print_tree(root->right, depth + 1);
     print_tree(root->middle, depth + 1);
-    printf("%*s[", depth * 4, "");
+    printf("%*s(", depth * 4, "");
     if (root->key2 != NULL) {
-        printf("%s,%u|", root->key1->data, root->info);
-        printf("%s,%u", root->key2->data, root->info);
+        printf("%s;%u|", root->key1->data, root->info);
+        printf("%s;%u", root->key2->data, root->info);
     } else {
-        printf("%s,%u", root->key1->data, root->info);
+        printf("%s;%u", root->key1->data, root->info);
     }
-    printf("]\n");
+    printf(")\n");
     print_tree(root->left, depth + 1);
 }
 
 Node *find(Node *root, char *k, int order) {
     if (!root) return NULL;
-    if (strcmp(root->key1->data, k) == 0 && root->key1->order == order) return root;
+    if (root->key1 && strcmp(root->key1->data, k) == 0 && root->key1->order == order) return root;
     if (root->key2 && strcmp(root->key2->data, k) == 0 && root->key2->order == order) return root;
     Node* result = find(root->left, k, order);
     if (result) return result;
@@ -464,8 +484,8 @@ Node *find(Node *root, char *k, int order) {
 // Вывод в прямом порядке следования ключей, не входящих в заданный диапазон [a, b]
 void treeTraversal(Node *root, char *a, char *b) {
     if (!root) return ;
-    if (strcmp(root->key1->data, a) < 0 || strcmp(root->key1->data, b) > 0) printf("%s: %d\n", root->key1->data, root->info);
-    if (root->key2 && (strcmp(root->key2->data, a) < 0 || strcmp(root->key2->data, b) > 0)) printf("%s: %d1\n", root->key2->data, root->info);
+    //if (strcmp(root->key1->data, a) < 0 || strcmp(root->key1->data, b) > 0) printf("%s: %d\n", root->key1->data, root->info);
+    //if (root->key2 && (strcmp(root->key2->data, a) < 0 || strcmp(root->key2->data, b) > 0)) printf("%s: %d1\n", root->key2->data, root->info);
     treeTraversal(root->left, a, b);
     treeTraversal(root->middle, a, b);
     treeTraversal(root->right, a, b);
@@ -478,12 +498,12 @@ void delTree(Node **proot) {
         delTree(&((*proot)->middle));
         delTree(&((*proot)->right));
         if ((*proot)->key1) {
-        	free((*proot)->key1->data);
-        	free((*proot)->key1);
+            free((*proot)->key1->data);
+            free((*proot)->key1);
         }
         if ((*proot)->key2) {
-        	free((*proot)->key2->data);
-        	free((*proot)->key2);
+            free((*proot)->key2->data);
+            free((*proot)->key2);
         }
         free(*proot);
     }
@@ -491,15 +511,19 @@ void delTree(Node **proot) {
 }
 
 void psevdoDel(Node *root) {
-	if (root) {
-		psevdoDel(root->left);
-		psevdoDel(root->middle);
-		psevdoDel(root->right);
-		if (root->key1) free(root->key1);
-		if (root->key2) free(root->key2);
-		free(root);
-	}
-	
+    if (root) {
+        psevdoDel(root->left);
+        psevdoDel(root->middle);
+        psevdoDel(root->right);
+        if (root->key1) {
+            free(root->key1);
+        }
+        if (root->key2) {
+            free(root->key2);
+        }
+        free(root);
+    }
+
 }
 
 // Проверка узла, является ли он листом

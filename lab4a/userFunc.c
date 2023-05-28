@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
@@ -186,41 +185,53 @@ int D_Import(Node **proot) {
 // Таймирование, аргумент функции не нужен, так как создается собственное дерево
 int D_Timing(Node **) {
     Node *root = calloc(1, sizeof(Node)); // = &EList
-    int n = 10, cnt = 1000000, i, m;
-    char letters[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    root->key = NULL; root->left = root->right = NULL;
+    int n = 10, cnt = 100, m;
+    char *letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     char *key[10000];
+    char *k;
     clock_t first, last;
     srand(time(NULL));
-    while (n-- > 0){
-        for (i = 0; i < 10000; ++i) {
-            char *k = calloc(5, sizeof(char));
-            for (int j = 0; j < 4; ++j) {y
-            
-                int rand_index = rand() % (sizeof(letters) - 1);
-                k[j] = letters[rand_index];
+    //for (int _ = 0; _ < 10; ++_) { //Рассматриваем лес из 10ти деревьев
+    	//Node **masPtr = calloc(10000, sizeof(Node *));
+        while (n-- > 0) {
+            for (int i = 0; i < 10000; ++i) {
+                k = calloc(5, sizeof(char));
+                for (int j = 0; j < 4; ++j) {
+                    int rand_index = rand() % (sizeof(letters) - 1);
+                    k[j] = letters[rand_index];
+                }
+                key[i] = k;
             }
-            key[i] = k;
-        }
-        for (i = 0; i < cnt; ){
-            char *k = calloc(5, sizeof(char));
-            for (int j = 0; j < 4; ++j) {
-                int rand_index = rand() % (sizeof(letters) - 1);
-                k[j] = letters[rand_index];
+            for (int i = 0; i < cnt; ++i){
+                k = calloc(5, sizeof(char));
+                for (int j = 0; j < 4; ++j) {
+                    int rand_index = rand() % (sizeof(letters) - 1);
+                    k[j] = letters[rand_index];
+                }
+                //insert(&root, k, rand());
             }
-            if (insert(&root, k, rand()))
-            	++i;
-        }
-        m = 0;
-        first = clock();
-        for (i = 0; i < 10000; ++i) {
-            directTreeTraversalInTheRange(root, "a", "b");
-            ++m;
-        }
-        last = clock();
-        printf("%d items was found\n", m);
-        printf("test #%d, number of nodes = %d, time = %lf\n", 10 - n, (10 - n) * cnt, (double)(last - first) / CLOCKS_PER_SEC);
+            m = 0;
+            Node **masPtr = calloc(1000, sizeof(Node *));
+            first = clock();
+            for (int i = 0; i < 10000; ++i) {
+            	//directTreeTraversalInTheRange(root, key[i], key[9999 - i]);
+                //deleteNode(root, key[i]);
+                insert(&root, key[i], rand());
+                ++m;
+            }
+            last = clock();
+            //printf("%d items was found\n", m);
+            printf("%lf\n", (double)(last - first)/CLOCKS_PER_SEC); //"test #%d, number of nodes = %d,
+            free(masPtr);
 
-    }
-    delTree(&root);
+        }
+        for (int j = 0; j < 10000; ++j) {
+            free(key[j]);
+        }
+        delTree(&root);
+        //free(masPtr);
+        puts("-------------------------------------------------------------------------");
+    //}
     return 1;
 }

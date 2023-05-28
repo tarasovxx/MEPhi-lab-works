@@ -30,7 +30,7 @@ void delTree(Node **);		// освобождение памяти
 
 void treeTraversal(Node *, char *, char *); //Прямой обход дерева в заданном диапазоне ключей
 
-Node* split(Node *, char * );
+Node* split(Node *, char * , int , int);
 
 int is_leaf(Node *root);
 

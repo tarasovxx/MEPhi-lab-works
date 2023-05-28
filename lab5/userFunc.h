@@ -24,4 +24,3 @@ int D_ShortestPath(Graph **);
 int D_Modify(Graph **);
 
 #endif //LAB5_USERFUNC_H
-

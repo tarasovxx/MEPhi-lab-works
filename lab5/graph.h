@@ -1,32 +1,20 @@
 #ifndef LAB5_GRAPH_H
 #define LAB5_GRAPH_H
 
+//#include "func.h"
+#include "hashTable.h"
+
 //// Ориентированный граф
 
-//Типы клеток
-typedef enum cellType{
-    USUAL,
-    LABIRINT_ENTRY,
-    LABIRINT_EXIT
-} cellType;
 
-// Структура данных для хранения узлов списка смежности Graph
-typedef struct Edge {
-    int src, dest;
-} Edge;
-
-typedef struct Pair {
-    unsigned int x;
-    unsigned int y;
-} Pair;
 
 typedef struct Node {
-    int dest;
+    Pair *dest;
     struct Node *next;
 } Node;
 
 typedef struct Vertex {
-    unsigned int index;
+    //unsigned int index;
     Pair *coordinates;
     cellType type;
     Node *edge;
@@ -39,22 +27,35 @@ typedef struct Graph { //// Список списка смежности :)
     Vertex *head; // Список ребер смежных с данной вершиной
 } Graph;
 
-int addVertex(Graph **, unsigned int , unsigned int , cellType );
+int addVertex(Graph **, Pair ** , cellType );
 
-Vertex *findVertex(Graph *, int );
+Vertex *findVertex(Graph *, Pair *);
 
-int addEdge(Graph **, int , int );
+int addEdge(Graph **, Pair **, Pair **);
 
-int deleteVertex(Graph **, int );
+int deleteVertex(Graph **, Pair *);
 
-int deleteEdge(Graph **, int , int );
+int deleteEdge(Graph **, Pair *, Pair *);
 
-int updateVertex(Graph **, int , unsigned int , unsigned int , cellType );
+int updateVertex(Graph **, Pair *, cellType );
 
 int printGraph(Graph *);
 
 int delGraph(Graph **);
 
+int pairCompare(Pair *, Pair *);
+
+int checkReachability(Graph *, Pair *);
+
+int dfs(Graph *, Vertex *, Table *);
+
+int shortestPath(Graph *, Pair *, Pair *, Pair **);
+
+Vertex* findExitVertex(Graph * );
+
+Vertex* findEntryVertex(Graph *);
+
+int buildMST(Graph *);
+
 
 #endif //LAB5_GRAPH_H
-
