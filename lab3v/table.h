@@ -40,4 +40,6 @@ int binarySearch(const Table *, const char *);
 
 int insertLastRelease(Table *, char *);
 
+KeySpace *findNextItem(Table *); // Реализация поиска как итератора
+
 #endif //LAB3_TABLE_H

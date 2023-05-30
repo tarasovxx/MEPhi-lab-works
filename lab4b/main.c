@@ -5,6 +5,7 @@
 #include "B_Tree.h"
 #include "userFunc.h"
 #include "checkFunc.h"
+#include "graphvizDopTask.h"
 
 // Альтернативы меню для организации диалога
 const char *msgs[] = { "0. Quit", "1. Add", "2. Find", "3. Delete", "4. Show", "5. Traversal", "6. SpecialFind (getMax)", "7. Import file", "8. Timing" };	// список альтернатив
@@ -25,6 +26,8 @@ int main() {
         if (!fptr[rc](&root))
             break;
     printf("That's all. Bye!\n");
+    visualizeTree(root);
+    generateTreeImage();
     delTree(&root);
     return 0;
 }

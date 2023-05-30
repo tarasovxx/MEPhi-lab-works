@@ -1,0 +1,7 @@
+#ifndef LAB4A_GRAPHVIZDOPTASK_H
+#define LAB4A_GRAPHVIZDOPTASK_H
+
+void generateTreeImage();
+
+
+#endif //LAB4A_GRAPHVIZDOPTASK_H

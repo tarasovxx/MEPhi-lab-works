@@ -2,6 +2,7 @@
 #define LAB4A_BINTREE_H
 
 #include "otherFunc.h"
+#include <graphviz/cgraph.h>
 
 // Tree node
 typedef struct Node{
@@ -57,5 +58,9 @@ Node *fix(Node *);
 int checkLastRelease(Node *, char *, int *);
 
 void psevdoDel(Node *);
+
+void visualizeTree(Node * );
+
+void createGraphNodes(Agraph_t *, Agnode_t *, Node *);
 
 #endif //LAB4A_BINTREE_H

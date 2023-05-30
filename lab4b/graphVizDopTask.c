@@ -51,8 +51,6 @@ void generateDotFile(Node* root) {
     agwrite(graph, file);
     fclose(file);
     agclose(graph);
-    //agfree(graph, agnameof(graph));
-    //free(graph);
 }
 
 void generateTreeImage() {

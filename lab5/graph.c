@@ -406,8 +406,15 @@ int buildMST(Graph *graph) { // Так как нам нужно модифици
     	if (!pairCompare(v->coordinates, exitVertex->coordinates) && !pairCompare(v->coordinates, startVertex->coordinates)) updateVertex(&graph, v->coordinates, USUAL);
         KeySpace *tempPar = tableFind(par, v->coordinates);
         if (tempPar->parent) {
+        	int sizeNode = 0;
+            Vertex *isk = findVertex(graph, tempPar->parent);
+            Node *ptr = isk->edge;
+            while (ptr) {
+                ++sizeNode;
+                ptr = ptr->next;
+            }
             //if (!pairCompare(v->coordinates, exitVertex->coordinates)) updateVertex(&graph, v->coordinates, USUAL); // Все вершины, которые не является ни start ни exit, превращаются в USUAL, либо пможно удалять
-            if (!pairCompare(v->coordinates, exitVertex->coordinates) && !pairCompare(v->coordinates, startVertex->coordinates) && !pairCompare(tempPar->parent, startVertex->coordinates)) {
+            if (sizeNode > 1 && !pairCompare(v->coordinates, exitVertex->coordinates) && !pairCompare(v->coordinates, startVertex->coordinates) && !pairCompare(tempPar->parent, startVertex->coordinates)) {
                 deleteEdge(&graph, v->coordinates, tempPar->parent);
                 deleteEdge(&graph, tempPar->parent, v->coordinates);
             }

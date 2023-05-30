@@ -181,25 +181,27 @@ int D_Update(Graph **graph) {
         return 0; // Обнаружен конец файла
     const char *selectType = "Please choose the type of this cell\n1 - Usual\n2 - labirint entry\n3 - labirint exit";
     puts(selectType);
-    checker = getUnsignedInt(&t);
-    if (t == 0)
-        return 0; // Обнаружен конец файла
-    while (t < 1 || t > 3) {
-        switch (t) {
-            case 1:
-                type = USUAL;
-                break;
-            case 2:
-                type = LABIRINT_ENTRY;
-                break;
-            case 3:
-                type = LABIRINT_EXIT;
-                break;
-            default:
-                puts("Incorrect value, please enter type again\n");
-                puts(selectType);
-        }
-    }
+    //checker = getUnsignedInt(&t);
+   	do {
+		checker = getUnsignedInt(&t);
+		if (checker == 0)
+		    return 0; // Обнаружен конец файла
+		switch (t) {
+		    case 1:
+		        type = USUAL;
+		        break;
+		    case 2:
+		        type = LABIRINT_ENTRY;
+		        break;
+		    case 3:
+		        type = LABIRINT_EXIT;
+		        break;
+		    default:
+		        puts("Incorrect value, please enter type again\n");
+		        puts(selectType);
+		        break;
+		}
+    } while (t < 1 || t > 3);
     Pair *p = calloc(1, sizeof(Pair)); p->x = x; p->y = y;
     int r = updateVertex(graph, p, type); //Возможно мы не изменяем граф, а просто делаем что-то внтури функции, подумай над этим
     if (r) {

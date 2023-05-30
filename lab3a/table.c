@@ -47,6 +47,23 @@ int findKey(Table *t, int k) { //Можно сделать Search && find отд
     return KEY_NOT_FOUND; //-1 Не нашли
 }
 
+KeySpace *findNextItem(Table *t) {
+	static int currentIndex = 0; // Храним текущий индекс на каждом заходе в функцию ьерем тот, который был при выходе из функции
+
+	while (currentIndex < t->csize) {
+		KeySpace *ks = &(t->ks[currentIndex]);
+		if (ks->busy) {
+			// Поймали какой-то элемент его ретерним и уже в функции проверям то ли это
+			currentIndex++;
+			return ks;
+		}
+	}
+	currentIndex = 0;
+	return NULL; // Если вернули NULL значит обошли всё, значит следующая итерация будет с начала
+
+	
+}
+
 int findParent(Table *t, int k) {
     if (t->csize < 1) return -1; //Не нашли
     for (int i = 0; i < t->csize; ++i) {

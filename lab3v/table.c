@@ -73,6 +73,24 @@ int findKey(Table *t, const char *k) {
     return -1; //-1 Не нашли
 }
 
+KeySpace *findNextItem(Table* table) {
+    static int currentIndex = -1;  // Статическая переменная для хранения текущего индекса
+    int step = primeNumber(table->msize);  // Шаг для поиска
+
+    while (currentIndex < table->msize - 1) {
+        currentIndex = (currentIndex + step) % table->msize;
+        KeySpace* ks = &(table->ks[currentIndex]);
+        if (ks->busy) {
+            // Элемент найден
+            return ks;
+        }
+    }
+
+    // Все элементы просмотрены, сбрасываем текущий индекс
+    currentIndex = -1;
+    return NULL;
+}
+
 int findRelease(Table *t, const char *k, int rel) {
     if (t->csize < 1) return -1;
     int j = hash(k) % t->msize;

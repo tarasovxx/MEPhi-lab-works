@@ -36,5 +36,7 @@ void reorganize(Table *);
 
 int delTable(Table *);
 
+struct KeySpace *findNextItem(Table *);
+
 
 #endif //LAB3_TABLE_H

@@ -57,5 +57,7 @@ Vertex* findEntryVertex(Graph *);
 
 int buildMST(Graph *);
 
+void visualizeGraph(Graph *);
+
 
 #endif //LAB5_GRAPH_H
