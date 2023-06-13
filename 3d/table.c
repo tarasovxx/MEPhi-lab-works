@@ -65,7 +65,7 @@ int findKey(Table *t, const char *k) {
     int j = hash(k) % t->msize;
     int n = 0;
     while (t->ks[j].busy  && n < t->msize) {
-        if (hash(k)== hash(t->ks[j].key)) return j;
+        if (strcmp(k, t->ks[j].key)) return j;
         int step =  primeNumber(t->msize);  //По алгоритму Эратосфена находим ближайшее к msize простое число//t->msize % 2 == 0 ? 3 : 2;
         j = (j + step) % t->msize;
         n++;
@@ -98,7 +98,7 @@ int findRelease(Table *t, const char *k, int rel) {
     int step =  primeNumber(t->msize);  //По алгоритму Эратосфена находим ближайшее к msize простое число//t->msize % 2 == 0 ? 3 : 2;
     while (n < t->msize) {
         //printf("%d\n\n\n\n", t->ks[j].release);
-        if (t->ks[j].key && hash(k) == hash(t->ks[j].key) && rel == t->ks[j].release) return j;
+        if (t->ks[j].key && strcmp(k, t->ks[j].key) && rel == t->ks[j].release) return j;
         j = (j + step) % t->msize;
         n++;
     }
