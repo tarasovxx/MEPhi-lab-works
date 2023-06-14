@@ -3,9 +3,8 @@
 #include <string.h>
 
 
-#include "hashTable.h"
-#include "userFunc.h"
-#include "checkFunc.h"
+#include "table.h"
+#include "func.h"
 
 int main() {
     const char *msgs[] = {"0. Quit", "1. Add",
@@ -16,19 +15,33 @@ int main() {
 
     Table *table = calloc(1, sizeof(Table)); //Сделать функция create_table
 
-    int (*fptr[])(Table *) = {NULL, D_Add, D_Find,
-                              D_Delete, D_Show,
-                              D_CheckRelease, D_Import};
-    int rc;
+    int D_Add(Table *), // вставка элемента
+    D_Find(Table *), // поиск элемента
+    D_Delete(Table *), // удаление элемента
+    D_Show(Table *), //Вывод
+    D_CheckRelease(Table *), // реорганизация таблицы (сборщик мусора)
+    D_Import(Table *);
 
-    if (D_Load(table) == 0) // Загружаем таблицу, подготавливаем к работе файл данных
-        return 1;
+
+    int (*fptr[])(Table *) = {NULL, D_Add, D_Find,
+                               D_Delete, D_Show,
+                              D_CheckRelease, D_Import};
+    int m;
+    printf("Enter the msize value --->");
+    getInt(&m);
+    table->msize = m;
+
+    table->ks = (KeySpace *) calloc(table->msize, sizeof(KeySpace));
+    table->rel = (Pair *) calloc(table->msize, sizeof(Pair));
+    for (int i = 0; i < table->msize; ++i) {
+        table->ks[i].data = calloc(1, sizeof(Item));
+    }
+    int rc;
     while (rc = dialog(msgs, cntMsgs)) {
         if (!fptr[rc](table)) {
             break;
         }
     }
-    save(table); // Выгружаем таблицу в файлик и со спокойной душей идем пить чай
     printf("That's all. Bye!\n");
     delTable(table);
     return 0;

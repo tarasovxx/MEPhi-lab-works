@@ -12,8 +12,3 @@ unsigned long long hash(const char *s) {
     return h;
 }
 
-
-
-
-
-

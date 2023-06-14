@@ -65,7 +65,7 @@ int findKey(Table *t, const char *k) {
     int j = hash(k) % t->msize;
     int n = 0;
     while (t->ks[j].busy  && n < t->msize) {
-        if (strcmp(k, t->ks[j].key)) return j;
+        if (strcmp(k, t->ks[j].key) == 0) return j;
         int step =  primeNumber(t->msize);  //По алгоритму Эратосфена находим ближайшее к msize простое число//t->msize % 2 == 0 ? 3 : 2;
         j = (j + step) % t->msize;
         n++;
@@ -98,7 +98,7 @@ int findRelease(Table *t, const char *k, int rel) {
     int step =  primeNumber(t->msize);  //По алгоритму Эратосфена находим ближайшее к msize простое число//t->msize % 2 == 0 ? 3 : 2;
     while (n < t->msize) {
         //printf("%d\n\n\n\n", t->ks[j].release);
-        if (t->ks[j].key && strcmp(k, t->ks[j].key) && rel == t->ks[j].release) return j;
+        if (t->ks[j].key && strcmp(k, t->ks[j].key) == 0 && rel == t->ks[j].release) return j;
         j = (j + step) % t->msize;
         n++;
     }
@@ -141,17 +141,19 @@ int D_Delete(Table *t) {
     n = getInt(&version);
     if (n == 0) return 0;
     int i = findRelease(t, k, version);
-    if (i >= 0)
+    if (i >= 0) {
         delete(t, k, i);
+        printf("The item table[%s] = %d was successfully deleted\n", k, t->ks[i].data->x);
+        printf("You have deleted %d version of the element\n", t->ks[i].release);
+    }
     if (i < 0) {
         puts("This key was not found\n");
+        free(k);
         return -1; //Такого ключа нет
     }
 //    int i = find(t, k);
 //    if (i < 0) return -1; //Такого ключа нет
 //    t->ks[i].busy = 0;
-    printf("The item table[%s] = %d was successfully deleted\n", k, t->ks[i].data->x);
-    printf("You have deleted %d version of the element\n", t->ks[i].release);
     free(k);
     return 1; //Good
 }

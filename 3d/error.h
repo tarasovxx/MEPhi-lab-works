@@ -1,5 +1,5 @@
-#ifndef LAB3_ERROR_H
-#define LAB3_ERROR_H
+#ifndef LAB3G_ERROR_H
+#define LAB3G_ERROR_H
 
 enum Errors {
     OK = 0,
@@ -9,5 +9,4 @@ enum Errors {
 
 const char *errMsgs[] = {"Ok", "Duplicate key", "Table overflow"};
 
-
-#endif //LAB3_ERROR_H
+#endif //LAB3G_ERROR_H
