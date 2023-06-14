@@ -19,21 +19,6 @@ int insert(Node **proot, char *k, int info) {
         else {
             ptr = ptr->right;
         }
-//        if (strcmp(ptr->key, k) == 0)
-//            return 0; // Дублирование возможно
-//        int m = strcmp(k, ptr->key);
-//        if (strlen(k) < strlen(par->key)) {
-//            ptr = ptr->left;
-//        }
-//        else if (strlen(k) > strlen(par->key)) {
-//            ptr = ptr->right;
-//        }
-//        else {
-//            if (strcmp(k, par->key) <= 0)
-//                ptr = ptr->left;
-//            else
-//                ptr = ptr->right;
-//        }
     }
     ptr = (Node *) calloc(1, sizeof(Node));
     ptr->key = strdup(k);
@@ -42,53 +27,52 @@ int insert(Node **proot, char *k, int info) {
     if (par == NULL)
         *proot = ptr;
     else
-//        if (strlen(k) < strlen(par->key)) {
-//            par->left = ptr;
-//        }
-//        else if (strlen(k) > strlen(par->key)) {
-//            par->right = ptr;
-//        }
-//        else {
+
         if (strcmp(par->key, k) >= 0)
             par->left = ptr;
         else
             par->right = ptr;
-        //}
     return OK;
 }
 
 // Функция удаление элемента из дерева
 // При дублированиий ключей удаляем самый страый
-Node* deleteNode(Node* root, char* key) {
+Node* deleteNode(Node* root, Node* target) {
     if (root == NULL) {
         return root;
     }
-    if (strcmp(key, root->key) < 0) {
-        root->left = deleteNode(root->left, key);
+    if (strcmp(target->key, root->key) < 0) {
+        root->left = deleteNode(root->left, target);
     } 
-    else if (strcmp(key, root->key) > 0) {
-        root->right = deleteNode(root->right, key);
+    else if (strcmp(target->key, root->key) > 0) {
+        root->right = deleteNode(root->right, target);
     } 
-    else {
-        if (root->left == NULL) {
-            Node* temp = root->right;
-            free(root->key);
-            free(root);
-            root = NULL;
-            return temp;
-        } 
-        else if (root->right == NULL) {
-            Node* temp = root->left;
-            free(root->key);
-            free(root);
-            root = NULL;
-            return temp;
-        }
-        Node* temp = findMin(root->right);
-        free(root->key);
-        root->key = strdup(temp->key);
-        root->info = temp->info;
-        root->right = deleteNode(root->right, temp->key);
+    // В случае если мы нашли искомое, то ещё проверяем соотвествует ли адрес искомомого элменета и удаляемого
+    else { 
+    	if (root != target) {
+    		root->left = deleteNode(root->left, target);
+    	}
+    	else {
+	        if (root->left == NULL) {
+	            Node* temp = root->right;
+	            free(root->key);
+	            free(root);
+	            root = NULL;
+	            return temp;
+	        } 
+	        else if (root->right == NULL) {
+	            Node* temp = root->left;
+	            free(root->key);
+	            free(root);
+	            root = NULL;
+	            return temp;
+	        }
+	        Node* temp = findMin(root->right);
+	        free(root->key);
+	        root->key = strdup(temp->key);
+	        root->info = temp->info;
+	        root->right = deleteNode(root->right, temp);
+	    }    
     }
     return root;
 }

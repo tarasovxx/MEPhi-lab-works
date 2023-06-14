@@ -119,7 +119,9 @@ int D_Delete(Node **proot) {
     char *key = getStr("Enter key [P.S.: char *]: -->");
     if (!key)
         return 0;
-    *proot = deleteNode(*proot, key);
+
+   	Node *target = findOne(*proot, key);
+    *proot = deleteNode(*proot, target);
     if (*proot)
         printf("Ok\n");
     else

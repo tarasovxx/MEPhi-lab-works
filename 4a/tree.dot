@@ -1,6 +1,2 @@
 digraph tree {
-	qqqqq -> qqqq;
-	qqqq -> qqqqq;
-	qqqq -> qqqq;
-	qqqq -> qqqq;
 }

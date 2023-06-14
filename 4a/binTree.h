@@ -15,7 +15,7 @@ typedef struct Node{
 // функции для работы с деревом
 int insert(Node **, char *, int);	// вставка элемента
 
-Node *deleteNode(Node *, char *);	// удаление элемента
+Node *deleteNode(Node *, Node *);	// удаление элемента
 
 int findAll(Node **, Node *, char *);	// поиск элемента по ключу
 
