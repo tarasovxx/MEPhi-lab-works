@@ -28,15 +28,17 @@ int findKey(Table *, int );
 
 int findParent(Table *, int );
 
-int delete(Table *, int , int );
+int delete(Table *, int );
 
-int delete2(Table *, int , int );
+int delete2(Table *, int );
 
 void reorganize(Table *);
 
 int delTable(Table *);
 
 struct KeySpace *findNextItem(Table *);
+
+int findAllParent(Table *, int *,  int );
 
 
 #endif //LAB3_TABLE_H

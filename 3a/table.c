@@ -5,6 +5,7 @@
 #include "table.h"
 #include "func.h" //UNION
 #include "error.h"
+#include "stack.h"
 
 int D_Add(Table *t) {
     int k, rc, n, par;
@@ -72,6 +73,16 @@ int findParent(Table *t, int k) {
     return KEY_NOT_FOUND; //-1 Не нашли
 }
 
+int findAllParent(Table *t, int *mas, int k) {
+    if (t->csize < 1) return -1; //Не нашли
+    int j = 0;
+    for (int i = 0; i < t->csize; ++i) {
+        if (k == t->ks[i].par && t->ks[i].busy == 1) mas[j++] = i;
+    }
+
+    return j;
+}
+
 
 int insert(Table *t, int k, int par, char* info) {
     int i = findKey(t, k);
@@ -110,7 +121,7 @@ int D_Delete(Table *t) {
     }
     int i = findKey(t, k); //Убрать в delete 
     if (i >= 0)
-        delete2(t, k, i);
+        delete2(t, i);
     if (i < 0) {
         puts("This key was not found\n");
         return KEY_NOT_FOUND; //Такого ключа нет
@@ -259,26 +270,38 @@ void reorganize(Table *table) {
 }
 
 
-int delete(Table *t, int k, int i) {
+int delete(Table *t, int i) {
+    if (i == -1) return 0;
     t->ks[i].busy = 0;
-    int j = findParent(t, t->ks[i].key);
-    if (j != -1) delete(t, t->ks[j].key, j);
-//    if (t->ks[i].par == 0) return 0;
-//    if (t->ks[i].par != 0) {
-//        int j = find(t, t->ks[i].par, 1);
-//        delete(t, t->ks[j].par, j);
-//    }
+    int dsf = t->ks[i].key;
+    int j = 0;
+    j = findParent(t, t->ks[i].key);
+    delete(t, j);
+    j = findParent(t, t->ks[i].key);
+    delete(t, j);
+    //delete(t, t->ks[j].key, j);
+    return 0;
 }
 
-int delete2(Table *t, int k, int i) {
-	int j = i;
-	while (j != -1) {
-		t->ks[j].busy = 0;
-		int key = t->ks[j].key;
-		while (j != -1) {
-			t->ks[j].busy = 0;
-			j = findParent(t, key);
-		} 
-		if (j != -1) j = findParent(t, t->ks[j].key);
-	}
+int delete2(Table* t, int i) {
+    // Заведем стэк (Заменит стэк рекурсивных вызовов)
+    // Рассматриваем случай, когда переполнение стэка невозможно, в связи с тем, что размер таблицы фиксирован
+    Stack *st = stack_create(t->msize);
+    stack_push(st, i);
+    while (stack_empty(st) != 1) {
+        // Добавляем в стэк всех детей i и помечаем i даленной
+        int numb = st->top - 1;
+        int ind = (numb >= 0) ? st->mas[numb] : 0;
+        int *mas = calloc(t->csize, sizeof(int));
+        int len = findAllParent(t, mas, t->ks[ind].key);
+        t->ks[ind].busy = 0;
+        int fd;
+        stack_pop(st, &fd);
+        while (len > 0) stack_push(st, mas[--len]); // стэк ИНДЕКСОВ!
+        free(mas);
+        i = st->mas[st->top];
+    }
+    stack_destroy(st);
+
+    return 0;
 }
