@@ -186,16 +186,15 @@ int D_Import(Node **proot) {
 
 // Таймирование, аргумент функции не нужен, так как создается собственное дерево
 int D_Timing(Node **) {
-    Node *root = calloc(1, sizeof(Node)); // = &EList
-    root->key = NULL; root->left = root->right = NULL;
-    int n = 10, cnt = 100, m;
-    char *letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    char *key[10000];
-    char *k;
-    clock_t first, last;
-    srand(time(NULL));
-    //for (int _ = 0; _ < 10; ++_) { //Рассматриваем лес из 10ти деревьев
-    	//Node **masPtr = calloc(10000, sizeof(Node *));
+    for (int _ = 0; _ < 10; ++_) { //Рассматриваем лес из 10ти деревьев
+        Node *root = calloc(1, sizeof(Node)); // = &EList
+        root->key = NULL; root->left = root->right = NULL;
+        int n = 10, cnt = 100000, m;
+        char *letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        char **key = calloc(10000, sizeof(char*));
+        char *k;
+        clock_t first, last;
+        srand(time(NULL));
         while (n-- > 0) {
             for (int i = 0; i < 10000; ++i) {
                 k = calloc(5, sizeof(char));
@@ -211,15 +210,16 @@ int D_Timing(Node **) {
                     int rand_index = rand() % (sizeof(letters) - 1);
                     k[j] = letters[rand_index];
                 }
-                //insert(&root, k, rand());
+                insert(&root, k, rand());
             }
             m = 0;
             Node **masPtr = calloc(1000, sizeof(Node *));
             first = clock();
             for (int i = 0; i < 10000; ++i) {
-            	//directTreeTraversalInTheRange(root, key[i], key[9999 - i]);
+                //directTreeTraversalInTheRange(root, key[i], key[9999 - i]);
                 //deleteNode(root, key[i]);
                 insert(&root, key[i], rand());
+                //findOne(root, key[i]);
                 ++m;
             }
             last = clock();
@@ -228,12 +228,13 @@ int D_Timing(Node **) {
             free(masPtr);
 
         }
-        for (int j = 0; j < 10000; ++j) {
+        for (int j = 0; j < cnt; ++j) {
             free(key[j]);
         }
+        free(key);
         delTree(&root);
         //free(masPtr);
         puts("-------------------------------------------------------------------------");
-    //}
+    }
     return 1;
 }

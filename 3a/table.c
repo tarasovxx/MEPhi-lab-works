@@ -284,8 +284,8 @@ int delete(Table *t, int i) {
 }
 
 int delete2(Table* t, int i) {
-    // Заведем стэк (Заменит стэк рекурсивных вызовов)
-    // Рассматриваем случай, когда переполнение стэка невозможно, в связи с тем, что размер таблицы фиксирован
+    // Заведем стtк (Заменит стeк рекурсивных вызовов)
+    // Рассматриваем случай, когда переполнение стека невозможно, в связи с тем, что размер таблицы фиксирован
     Stack *st = stack_create(t->msize);
     stack_push(st, i);
     while (stack_empty(st) != 1) {
@@ -297,7 +297,7 @@ int delete2(Table* t, int i) {
         t->ks[ind].busy = 0;
         int fd;
         stack_pop(st, &fd);
-        while (len > 0) stack_push(st, mas[--len]); // стэк ИНДЕКСОВ!
+        while (len > 0) stack_push(st, mas[--len]); // стeк ИНДЕКСОВ!
         free(mas);
         i = st->mas[st->top];
     }

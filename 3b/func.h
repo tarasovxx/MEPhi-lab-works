@@ -1,18 +1,18 @@
 #ifndef LAB3_FUNC_H
 #define LAB3_FUNC_H
 
-typedef struct Item {
-    char *info;
-}Item;
-
-typedef struct KeySpace {
-    int busy;
-    unsigned int key;
-    unsigned int par;
-    //Item *data;
-    int offset; // Смещение в файле
-    int len; //длина информации
-} KeySpace;
+//typedef struct Item {
+//    char *info;
+//}Item;
+//
+//typedef struct KeySpace {
+//    int busy;
+//    unsigned int key;
+//    unsigned int par;
+//    //Item *data;
+//    int offset; // Смещение в файле
+//    int len; //длина информации
+//} KeySpace;
 
 
 int getInt(int *n);

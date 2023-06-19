@@ -16,13 +16,13 @@ int insert_to_node(Node *root, char *k, int value, int order) { // Вставк�
         root->key1 = calloc(1, sizeof(Item));
         root->key1->data = strdup(k);
         root->key1->order = order;
-        root->info = value;
+        root->info1 = value;
     }
     else if (root->key2 == NULL) {
         root->key2 = calloc(1, sizeof(Item));
         root->key2->data = strdup(k);
         root->key2->order = order;
-        root->info = value;
+        root->info2 = value;
     }
     sort(root);
     return 0;
@@ -33,7 +33,7 @@ Node *insert(Node *root, char *key, int value) { // Всегда возвращ�
         Node *newNode = calloc(1, sizeof(Node));
         newNode->key1 = calloc(1, sizeof(Item));
         newNode->key1->data = strdup(key);
-        newNode->info = value;
+        newNode->info1 = value;
         return newNode;
     }
     int checker = 0, order = 0;
@@ -54,10 +54,10 @@ Node *insert(Node *root, char *key, int value) { // Всегда возвращ�
     else {
         insert(root->right, key, value);
     }
-    return checker == 1 ? split(root, key, order, 0) : root;
+    return checker == 1 ? split(root, key, order, value, 0) : root;
 }
 
-Node *split(Node *root, char *k, int ord, int flag) {
+Node *split(Node *root, char *k, int ord, int info, int flag) {
     //Создаём две ноды, которые имеют такого же родителя как и рахделяющийся элемент
     int ch = 0;
     Node *x = calloc(1, sizeof(Node));
@@ -66,18 +66,33 @@ Node *split(Node *root, char *k, int ord, int flag) {
     y->key1 = calloc(1, sizeof(Item));
     char *k_dup = strdup(k);
     if (flag) free(k);
-    sort3(&root->key1->data, &root->key2->data, &k_dup);
+    if (strcmp(root->key1->data, root->key2->data) > 0) {
+        swap(&root->key1->data, &root->key2->data);
+        swap_int(&root->key1->order, &root->key2->order);
+        swap_int(&root->info1, &root->info2);
+    }
+    if (strcmp(root->key1->data, k_dup) > 0) {
+        swap(&root->key1->data, &k_dup);
+        swap_int(&root->key1->order, &ord);
+        swap_int(&root->info1, &info);
+    }
+    if (strcmp(root->key2->data, k_dup) > 0) {
+        swap(&root->key2->data, &k_dup);
+        swap_int(&root->key2->order, &ord);
+        swap_int(&root->info2, &info);
+    }
+    //sort3(&root->key1->data, &root->key2->data, &k_dup);
     //if (strcmp(root->key1, k) > 0) swap(&root->key1, &k);
     x->key1->data = root->key1->data;
     x->key1->order = root->key1->order;
-    x->info = root->info;
+    x->info1 = root->info1;
     y->key1->data = k_dup;
 //    int ord = 0;
 //    Node *glav = root;
 //    while (glav->parent) glav = glav->parent;
 //    checkLastRelease(glav, k, &ord);
     y->key1->order = ord;
-    y->info = root->info;
+    y->info1 = info;
     x->parent = root->parent;
     y->parent = root->parent;
     x->left = root->left;
@@ -92,7 +107,7 @@ Node *split(Node *root, char *k, int ord, int flag) {
     }
     if (y->middle) y->middle->parent = y;
     if (root->parent) {
-        ch = insert_to_node(root->parent, root->key2->data, root->info, root->key2->order);
+        ch = insert_to_node(root->parent, root->key2->data, root->info2, root->key2->order);
         if (ch != 1) {
             free(root->key2->data);
             free(root->key2);
@@ -129,8 +144,10 @@ Node *split(Node *root, char *k, int ord, int flag) {
         Node *tmp = root->parent;
 	char *newKey = NULL;
         int targetInfo = 0;
+        int info2 = 0;
         if (ch == 1)  {
             targetInfo = root->key2->order;
+            info2 = root->info2;
             newKey = strdup(root->key2->data);
             free(root->key2->data);
             free(root->key2);
@@ -143,7 +160,7 @@ Node *split(Node *root, char *k, int ord, int flag) {
         //psevdoDel(root);
         //root = tmp;
         //free(root->key1->data);
-        return ch != 1 ? tmp : split(tmp, newKey, targetInfo, 1);	//free(root);
+        return ch != 1 ? tmp : split(tmp, newKey, targetInfo, info2, 1);	//free(root);
     }
     else {
         x->parent = root;   // Так как в эту ветку попадает только корень,
@@ -153,12 +170,13 @@ Node *split(Node *root, char *k, int ord, int flag) {
         root->key1->data = root->key2->data;
         root->key1->order = root->key2->order;
         free(root->key2);
+        root->info1 = root->info2;
         root->key2 = NULL;
 
         root->left = x;
         root->middle = y;
         root->right = NULL;
-        return ch != 1 ? root : split(root->parent, root->key2->data, root->key2->order, 0);;
+        return ch != 1 ? root : split(root->parent, root->key2->data, root->key2->order, root->info2, 0);;
     }
 }
 
@@ -172,15 +190,15 @@ Node *delete(Node *root, char *key, int order) {
     if (!mini) mini = getMin(target->right);
 
     if (mini) { // Свопаем ключи
-        int information = mini->info;
+        int information = mini->info1;
         if (target->key2 && strcmp(target->key2->data, key) == 0) {
             swap(&mini->key1->data, &target->key2->data);
             int ch = mini->key1->order;
             mini->key1->order = target->key1->order;
             target->key1->order = ch;
             //target->key2->data = tmp;
-            mini->info = target->info;
-            target->info = information;
+            mini->info1 = target->info2;
+            target->info2 = information;
             target = mini;
         }
         else {
@@ -190,8 +208,8 @@ Node *delete(Node *root, char *key, int order) {
             target->key1->order = ch;
             //mini->key1 = target->key1;
             //target->key1->data = tmp;
-            mini->info = target->info;
-            target->info = information;
+            mini->info1 = target->info1;
+            target->info1 = information;
             target = mini;
         }
     }
@@ -227,12 +245,12 @@ Node *redistribute(Node *leaf) {
     Node *second = parent->middle;
     Node *third = parent->right;
 
-    if ((parent->key1 && parent->key2) && ((first->key1 && !first->key2) || (!first->key1 && first->key2)) && ((second->key1 && !second->key2) || (!second->key1 && second->key2)) && ((third->key1 && !third->key2) || (!third->key1 && third->key2))) {
+        if ((parent->key1 && parent->key2) && ((first->key1 && !first->key2) || (!first->key1 && first->key2) || (!first->key1 && !first->key2) ) && ((second->key1 && !second->key2) || (!second->key1 && second->key2) || (!second->key1 && !second->key2)) && ((third->key1 && !third->key2) || (!third->key1 && third->key2) || (!third->key1 && !third->key2))) {
         if (first == leaf) {
             parent->left = parent->middle;
             parent->middle = parent->right;
             parent->right = NULL;
-            insert_to_node(parent->left, parent->key1->data, parent->info, parent->key1->order);
+            insert_to_node(parent->left, parent->key1->data, parent->info1, parent->key1->order);
             parent->left->right = parent->left->middle;
             parent->left->middle = parent->left->left;
 
@@ -244,7 +262,7 @@ Node *redistribute(Node *leaf) {
             remove_from_node(parent, parent->key1->data, parent->key1->order);
             free(first);
         } else if (second == leaf) {
-            insert_to_node(first, parent->key1->data, parent->info, parent->key1->order);
+            insert_to_node(first, parent->key1->data, parent->info1, parent->key1->order);
             remove_from_node(parent, parent->key1->data, parent->key1->order);
             if (leaf->left != NULL) first->right = leaf->left;
             else if (leaf->middle != NULL) first->right = leaf->middle;
@@ -273,21 +291,28 @@ Node *redistribute(Node *leaf) {
                 leaf->left = NULL;
             }
 
-            insert_to_node(leaf, parent->key1->data, parent->info, parent->key1->order);
+            insert_to_node(leaf, parent->key2->data, parent->info2, parent->key2->order);
             if (second->key1 && second->key2) {
-                parent->key2 = second->key2;
+            	free(parent->key2->data);
+                parent->key2->data = strdup(second->key2->data);
+                parent->key2->order = second->key2->order;
                 remove_from_node(second, second->key2->data, second->key2->order);
                 leaf->left = second->right;
                 second->right = NULL;
                 if (leaf->left != NULL) leaf->left->parent = leaf;
             } else if (first->key1 && first->key2) {
-                parent->key2 = second->key1;
+                free(parent->key2->data);
+                parent->key2->data = strdup(second->key1->data);
+                parent->key2->order = second->key1->order;
                 leaf->left = second->middle;
                 second->middle = second->left;
                 if (leaf->left != NULL) leaf->left->parent = leaf;
-
-                second->key1 = parent->key1;
-                parent->key1 = first->key2;
+                free(second->key1->data);
+                second->key1->data = strdup(parent->key1->data);
+                second->key1->order = parent->key1->order;
+                free(parent->key1->data);
+                parent->key1->data = strdup(first->key2->data);
+                parent->key1->order = first->key2->order;
                 remove_from_node(first, first->key2->data, first->key2->order);
                 second->left = first->right;
                 if (second->left != NULL) second->left->parent = second;
@@ -299,8 +324,9 @@ Node *redistribute(Node *leaf) {
                     leaf->left = leaf->middle;
                     leaf->middle = NULL;
                 }
-                insert_to_node(second, parent->key2->data, parent->info, parent->key2->order);
-                parent->key2 = third->key1;
+                insert_to_node(second, parent->key2->data, parent->info2, parent->key2->order);
+                parent->key2->data = strdup(third->key1->data);
+                parent->key2->order = third->key2->order;
                 remove_from_node(third, third->key1->data, third->key1->order);
                 second->middle = third->left;
                 if (second->middle != NULL) second->middle->parent = second;
@@ -312,8 +338,9 @@ Node *redistribute(Node *leaf) {
                     leaf->middle = leaf->left;
                     leaf->left = NULL;
                 }
-                insert_to_node(parent, parent->key1->data, parent->info, parent->key1->order);
-                parent->key1 = first->key2;
+                insert_to_node(parent, parent->key1->data, parent->info1, parent->key1->order);
+                parent->key1->data = strdup(first->key2->data);
+                parent->key1->order = first->key2->order;
                 remove_from_node(first, first->key2->data, first->key2->order);
                 second->left = first->right;
                 if (second->left != NULL) second->left->parent = second;
@@ -324,9 +351,10 @@ Node *redistribute(Node *leaf) {
                 leaf->left = leaf->middle;
                 leaf->middle = NULL;
             }
-            insert_to_node(first, parent->key1->data, parent->info, parent->key1->order);
+            insert_to_node(first, parent->key1->data, parent->info1, parent->key1->order);
             if (second->key1 && second->key2) {
-                parent->key1 = second->key1;
+                parent->key1->data = strdup(second->key1->data);
+                parent->key1->order = second->key1->order;
                 remove_from_node(second, second->key1->data, second->key1->order);
                 first->middle = second->left;
                 if (first->middle != NULL) first->middle->parent = first;
@@ -334,9 +362,15 @@ Node *redistribute(Node *leaf) {
                 second->middle = second->right;
                 second->right = NULL;
             } else if (third->key1 && third->key2) {
-                parent->key1 = second->key1;
-                second->key1 = parent->key2;
-                parent->key2 = third->key1;
+                free(parent->key1->data);
+                parent->key1->data = strdup(second->key1->data);
+                parent->key1->order = second->key1->order;
+                free(second->key1->data);
+                second->key1->data = strdup(parent->key2->data);
+                second->key1->order = parent->key2->order;
+                free(parent->key2->data);
+                parent->key2->data = strdup(third->key1->data);
+                parent->key2->order = third->key2->order;
                 remove_from_node(third, third->key1->data, third->key1->order);
                 first->middle = second->left;
                 if (first->middle != NULL) first->middle->parent = first;
@@ -348,11 +382,13 @@ Node *redistribute(Node *leaf) {
                 third->right = NULL;
             }
         }
-    } else if ((parent->key1 || parent->key2)) {
-        insert_to_node(leaf, parent->key1->data, parent->info, parent->key1->order);
+    } else if ((parent->key1 && !parent->key2) || (!parent->key1 && parent->key2)) {
+        insert_to_node(leaf, parent->key1->data, parent->info1, parent->key1->order);
 
         if (first == leaf && (second->key1 && second->key2)) {
-            parent->key1 = second->key1;
+            free(parent->key1->data);
+            parent->key1->data = strdup(second->key1->data);
+            parent->key1->order = second->key1->order;
             remove_from_node(second, second->key1->data, second->key1->order);
 
             if (leaf->left == NULL) leaf->left = leaf->middle;
@@ -362,8 +398,11 @@ Node *redistribute(Node *leaf) {
             second->middle = second->right;
             second->right = NULL;
             if (leaf->middle != NULL) leaf->middle->parent = leaf;
-        } else if (second == leaf && (first->key1 && first->key2)) {
-            parent->key1 = first->key2;
+        } 
+        else if (second == leaf && (first->key1 && first->key2)) {
+            free(parent->key1->data);
+            parent->key1->data = strdup(first->key2->data);
+            parent->key1->order = first->key2->order;
             remove_from_node(first, first->key1->data, first->key1->order);
 
             if (leaf->middle == NULL) leaf->middle = leaf->left;
@@ -376,12 +415,13 @@ Node *redistribute(Node *leaf) {
     return parent;
 }
 
+
 Node *merge(Node *leaf) {
     Node *parent = leaf->parent;
 
     if (parent->left == leaf) {
         //if (!parent->middle) parent->middle = calloc(1, sizeof(Node));
-        insert_to_node(parent->middle, parent->key1->data, parent->info, parent->key1->order);
+        insert_to_node(parent->middle, parent->key1->data, parent->info1, parent->key1->order);
         parent->middle->right = parent->middle->middle;
         parent->middle->middle = parent->middle->left;
 
@@ -394,7 +434,7 @@ Node *merge(Node *leaf) {
         free(parent->left);
         parent->left = NULL;
     } else if (parent->middle == leaf) {
-        insert_to_node(parent->left, parent->key1->data, parent->info, parent->key1->order);
+        insert_to_node(parent->left, parent->key1->data, parent->info1, parent->key1->order);
 
         if (leaf->left != NULL) parent->left->right = leaf->left;
         else if (leaf->middle != NULL) parent->left->right = leaf->middle;
@@ -459,10 +499,10 @@ void print_tree(Node *root, int depth) {
     print_tree(root->middle, depth + 1);
     printf("%*s(", depth * 4, "");
     if (root->key2 != NULL) {
-        printf("%s;%u|", root->key1->data, root->info);
-        printf("%s;%u", root->key2->data, root->info);
+        printf("%s;%u|", root->key1->data, root->info1);
+        printf("%s;%u", root->key2->data, root->info2);
     } else {
-        printf("%s;%u", root->key1->data, root->info);
+        printf("%s;%u", root->key1->data, root->info1);
     }
     printf(")\n");
     print_tree(root->left, depth + 1);
@@ -484,8 +524,8 @@ Node *find(Node *root, char *k, int order) {
 // Вывод в прямом порядке следования ключей, не входящих в заданный диапазон [a, b]
 void treeTraversal(Node *root, char *a, char *b) {
     if (!root) return ;
-    //if (strcmp(root->key1->data, a) < 0 || strcmp(root->key1->data, b) > 0) printf("%s: %d\n", root->key1->data, root->info);
-    //if (root->key2 && (strcmp(root->key2->data, a) < 0 || strcmp(root->key2->data, b) > 0)) printf("%s: %d1\n", root->key2->data, root->info);
+    if (strcmp(root->key1->data, a) < 0 || strcmp(root->key1->data, b) > 0) printf("%s: %d\n", root->key1->data, root->info);
+    if (root->key2 && (strcmp(root->key2->data, a) < 0 || strcmp(root->key2->data, b) > 0)) printf("%s: %d1\n", root->key2->data, root->info);
     treeTraversal(root->left, a, b);
     treeTraversal(root->middle, a, b);
     treeTraversal(root->right, a, b);
@@ -557,4 +597,10 @@ void sort3(char **x, char **y, char **z) {
 void sort(Node *root) {
     if (!root->key1 && !root->key2) return;
     if (root->key1 && root->key2) sort2(&root->key1->data, &root->key2->data);
+}
+
+void swap_int(int *a, int *b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
 }

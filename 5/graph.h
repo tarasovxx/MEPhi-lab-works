@@ -5,9 +5,6 @@
 #include "hashTable.h"
 
 //// Ориентированный граф
-
-
-
 typedef struct Node {
     Pair *dest;
     struct Node *next;

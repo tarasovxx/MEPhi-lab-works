@@ -4,9 +4,6 @@
 //#include "func.h"
 
 typedef struct Table {
-    struct KeySpace *ks;
-    unsigned int msize; //Размер таблицы
-    unsigned int csize; //Текущий размер таблицы
     FILE *fd; //дескриптор
 } Table;
 
@@ -33,11 +30,11 @@ int findParent(const Table *, int );
 
 int delete(Table *, int , int );
 
-int delete2(Table *, int , int );
+//int delete2(Table *, int , int );
 
 int reorganize(Table *);
 
-int delTable(Table *);
+void delTable(Table *);
 
 char *findInfo(const Table *, int );
 

@@ -38,7 +38,7 @@ int addEdge(Graph **graph, Pair **src, Pair **dest) {
         // Одно или оба из заднных вершин отсутствуют
         return 0;
     }
-    if (abs(first->coordinates->x - second->coordinates->x) <= 1 ||
+    if (abs(first->coordinates->x - second->coordinates->x) <= 1 &&
             abs(first->coordinates->y - second->coordinates->y) <= 1) {
         // В этом случае добовляем ребро между вершинами, все условия пройдены
         Node *newNode = calloc(1, sizeof(Node));
@@ -97,6 +97,9 @@ int deleteVertex(Graph **graph, Pair *target) {
             }
             prevEdge = edge;
             edge = edge->next;
+            free(prevEdge->dest);
+            free(prevEdge);
+            prevEdge = NULL;
         }
         temp = temp->next;
     }

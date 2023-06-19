@@ -13,7 +13,8 @@ typedef struct Node{
                 *right,		    // right subtree
                 *temp,
                 *parent;		// parent node // optional
-    unsigned int info;
+    unsigned int info1;
+    unsigned int info2;
 } Node;
 
 // функции для работы с деревом
@@ -31,7 +32,7 @@ void delTree(Node **);		// освобождение памяти
 
 void treeTraversal(Node *, char *, char *); //Прямой обход дерева в заданном диапазоне ключей
 
-Node* split(Node *, char * , int , int);
+Node* split(Node *, char * , int , int,  int);
 
 int is_leaf(Node *root);
 
@@ -62,5 +63,7 @@ void psevdoDel(Node *);
 void visualizeTree(Node * );
 
 void createGraphNodes(Agraph_t *, Agnode_t *, Node *);
+
+void swap_int(int *, int *);
 
 #endif //LAB4A_BINTREE_H

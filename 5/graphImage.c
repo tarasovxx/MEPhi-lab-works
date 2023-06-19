@@ -16,19 +16,23 @@ void visualizeGraph(Graph *graph) {
     fprintf(dotFile, "node [shape=oval];\n");
 
     // Traverse vertices
-    Vertex *vertex = graph->head;    while (vertex != NULL) {
+    Vertex *vertex = graph->head;    
+    while (vertex != NULL) {
         Pair *coordinates = vertex->coordinates;
         char label[50];
         char color[15];
+        char shape[15];
         sprintf(label, "%u %u", coordinates->x, coordinates->y);
         switch (vertex->type) {
             case USUAL:
                 strcpy(color, "black");
                 break;
             case LABIRINT_ENTRY:
+            	strcpy(shape, "square");
                 strcpy(color, "green");
                 break;
             case LABIRINT_EXIT:
+            	strcpy(shape, "triangle");
                 strcpy(color, "red");
                 break;
         }

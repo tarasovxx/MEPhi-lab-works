@@ -71,7 +71,7 @@ int D_Find(Node **proot) {
         return 0;
     Node *target = find(*proot, key, ord);
     if (target) {
-        printf("key = %s\ninformation = %d\nWas found\n", target->key1->data, target->info);
+        printf("key = %s\ninformation = %d\nWas found\n", target->key1->data, target->info1);
     }
     else
     if (*proot) printf("Node with key %s was not found\n", key);
@@ -83,9 +83,13 @@ int D_Find(Node **proot) {
 int D_FindSpecial(Node **proot) {
     Node *src = getMax(*proot);
     char *conc = src->key1->data;
-    if (src->key2) conc = src->key2->data;
+    int info = src->info1;
+    if (src->key2) {
+    	conc = src->key2->data;
+    	info = src->info2;
+    }
     if (src) {
-        printf("The element with the highest key value: %s: %u", conc, src->info);
+        printf("The element with the highest key value: %s: %u", conc, info);
     }
     return OK;
 }
@@ -176,41 +180,42 @@ int D_Timing(Node **) {
     char *k;
     clock_t first, last;
     srand(time(NULL));
-    //for (int _ = 0; _ < 10; ++_) { //Рассматриваем лес из 10ти деревьев
+    for (int _ = 0; _ < 10; ++_) { //Рассматриваем лес из 10ти деревьев
     //Node **masPtr = calloc(10000, sizeof(Node *));
-    while (n-- > 0) {
-        for (int i = 0; i < 10000; ++i) {
-            k = calloc(5, sizeof(char));
-            for (int j = 0; j < 4; ++j) {
-                int rand_index = rand() % (sizeof(letters) - 1);
-                k[j] = letters[rand_index];
-            }
-            key[i] = k;
-        }
-        for (int i = 0; i < cnt; ++i){
-            k = calloc(5, sizeof(char));
-            for (int j = 0; j < 4; ++j) {
-                int rand_index = rand() % (sizeof(letters) - 1);
-                k[j] = letters[rand_index];
-            }
-            insert(root, k, rand());
-        }
-        first = clock();
-        for (int i = 0; i < 10000; ++i) {
-            //find(root, key[i], rand() % 10);
-            //delete(root, key[i], rand() % 10);
-			//getMax(root);
-			//insert(root, k, rand());
-			treeTraversal(root, key[i], key[9999 - i]);
-        }
-        last = clock();
-        printf("%lf\n", (double)(last - first)/CLOCKS_PER_SEC); //"test #%d, number of nodes = %d,
+	    while (n-- > 0) {
+	        for (int i = 0; i < 10000; ++i) {
+	            k = calloc(5, sizeof(char));
+	            for (int j = 0; j < 4; ++j) {
+	                int rand_index = rand() % (sizeof(letters) - 1);
+	                k[j] = letters[rand_index];
+	            }
+	            key[i] = k;
+	        }
+	        for (int i = 0; i < cnt; ++i){
+	            k = calloc(5, sizeof(char));
+	            for (int j = 0; j < 4; ++j) {
+	                int rand_index = rand() % (sizeof(letters) - 1);
+	                k[j] = letters[rand_index];
+	            }
+	            insert(root, k, rand());
+	        }
+	        first = clock();
+	        for (int i = 0; i < 10000; ++i) {
+	            //find(root, key[i], rand() % 10);
+	            //delete(root, key[i], rand() % 10);
+				//getMax(root);
+				//insert(root, k, rand());
+				treeTraversal(root, key[i], key[9999 - i]);
+	        }
+	        last = clock();
+	        printf("%lf\n", (double)(last - first)/CLOCKS_PER_SEC); //"test #%d, number of nodes = %d,
 
-    }
-    for (int j = 0; j < 10000; ++j) {
-        free(key[j]);
-    }
-    delTree(&root);
+	    }
+	    for (int j = 0; j < 10000; ++j) {
+	        free(key[j]);
+	    }
+	    delTree(&root);
+	}
     //free(masPtr);
     puts("-------------------------------------------------------------------------");
     //}
